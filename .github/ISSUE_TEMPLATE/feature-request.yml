@@ -1,0 +1,40 @@
+name: 기능 추가 템플릿
+description: 기능 추가 시 사용할 템플릿입니다.
+title: "[FEAT] "
+labels:
+  - feature
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 기능 설명
+      placeholder: e.g. 회원정보 관리 API 구현, 사용자 인증 및 권한 관리 기능 추가 등
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: 요구 사항
+      placeholder: |-
+        - [ ] JWT 기반 인증 구현
+        - [ ] 사용자 등록 API 추가
+        - [ ] 로그인 API 추가
+    validations:
+      required: true
+  - type: textarea
+    id: condition
+    attributes:
+      label: 완료 조건
+      placeholder: |-
+        - [ ] 모든 테스트 통과
+        - [ ] API 문서화 완료
+        - [ ] 코드 리뷰 승인
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위
+      options:
+        - 낮음
+        - 보통
+        - 높음
