@@ -9,7 +9,6 @@ body:
     attributes:
       label: 기능 설명
       placeholder: e.g. 회원정보 관리 API 구현, 사용자 인증 및 권한 관리 기능 추가 등
-      required: true
   - type: textarea
     id: details
     attributes:
