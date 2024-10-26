@@ -1,0 +1,45 @@
+name: 버그 보고 템플릿
+description: 버그 보고 시 사용할 템플릿입니다.
+title: "[BUG] "
+labels:
+  - bug
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 버그 설명
+      placeholder: e.g. 유저 등록 API 호출 시 500 에러 발생
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: 재현 단계
+      description: |
+        버그를 재현하기 위한 단계별 절차를 작성해 주세요. 예:
+        - 해당 API endpoint 호출 (예: POST /api/v1/users)
+        - 요청 본문(JSON) 데이터 예시 작성
+        - 응답 확인
+        - 발생하는 에러 메시지 기록
+      placeholder: |
+        1. POST /api/v1/users 호출
+        2. 요청 본문 JSON 데이터 예시: { "email": "user@example.com", "password": "password" }
+        3. 응답 확인
+        4. 에러 메시지 기록
+  - type: input
+    id: expected_behavior
+    attributes:
+      label: "예상 동작"
+      description: "성공 시 예상되는 응답이나 동작을 작성해 주세요."
+      placeholder: "예: 성공 시 201 상태 코드와 사용자 정보 반환"
+  - type: textarea
+    id: error_logs
+    attributes:
+      label: "로그/에러 메시지"
+      description: "버그 발생 시의 로그 또는 에러 메시지를 추가해 주세요."
+      placeholder: |
+        예: 2024-10-01 12:34:56 ERROR - Error in user registration: Duplicate entry 'user@example.com' for key 'PRIMARY'
+  - type: textarea
+    id: additional_information
+    attributes:
+      label: "추가 정보"
+      description: "기타 참고 사항이나 관련된 Issue 번호가 있으면 추가해 주세요."
+      placeholder: "예: 관련된 설정 파일 경로 또는 관련 코드 위치"
