@@ -26,8 +26,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     console.error(`Exception: ${message}`, exception);
 
     response.status(status).json({
-      statusCode: status,
-      message: message,
+      status,
+      message,
       timestamp: new Date().toISOString(),
       path: request.url,
     });
