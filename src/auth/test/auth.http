@@ -1,0 +1,17 @@
+### 토큰 얻기
+GET http://localhost:3000/auth/token?id=6720620601e838f09f18739e&name=후루룩&email=hululug@gmail.com
+
+### Guard Test (logout)
+GET http://localhost:3000/auth/status
+
+### Guard Test
+GET http://localhost:3000/auth/status
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA2MjA2MDFlODM4ZjA5ZjE4NzM5ZSIsIm5hbWUiOiLtm4Tro6jro6kiLCJlbWFpbCI6Imh1bHVsdWdAZ21haWwuY29tIiwiaWF0IjoxNzMwMTgwMjc4fQ.T_u7NOEohuJ_-X-EHzswJKavUzI8yOn6zVGMC_HxKuA
+
+### Guard Test fail
+GET http://localhost:3000/auth/status
+Cookie: token=eyJhbciOiJIUzI1NiIsInR5cI6IkpXVCJ9.eyJpZCI6IjY3MjA2MjA2MDFlODM4ZjA5ZjE4NzM5ZSIsIm5hbWUiOiLtm4Tro6jro6kiLCJlbWFpbCI6Imh1bHVsdWdAZ21haWwuY29tIiwiaWF0IjoxNzMwMTc5MTUwfQ.TjVuS2wdpVWWM7y1tWicyDoSAltukqMbVy-gJuk-10A
+
+### Guard Test (not member)
+GET http://localhost:3000/auth/status
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA2MjA2MDFlODM4ZjA5ZjE4NzE5ZSIsIm5hbWUiOiLtm4Tro6jro6kiLCJlbWFpbCI6Imh1bHVsdWdAZ21haWwuY29tIiwiaWF0IjoxNzMwMTgyNDg2fQ.bHRhWcIi-TJc4QrXo8vrr22t68BgzPs2SxqbmNi3L7g
