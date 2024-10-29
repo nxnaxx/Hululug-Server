@@ -3,6 +3,6 @@ export default () => ({
   frontendUrl: process.env.FRONTEND_URL,
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
-  kakaoId: process.env.KAKAO_CLIENT_ID,
-  kakaoSecret: process.env.KAKAO_CLIENT_SECRET,
+  kakaoRestAPIKey: process.env.KAKAO_REST_API_KEY,
+  kakaoRedirectUri: process.env.KAKAO_REDIRECT_URI,
 });
