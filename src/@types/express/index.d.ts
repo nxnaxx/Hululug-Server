@@ -5,5 +5,8 @@ declare global {
     interface Request {
       user?: { userId: string };
     }
+    namespace Multer {
+      interface File extends Multerfile {}
+    }
   }
 }
