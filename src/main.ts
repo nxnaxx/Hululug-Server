@@ -4,12 +4,17 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters';
 import { TransformInterceptor } from './common/interceptors';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  app.enableCors();
+  app.use(cookieParser());
+  app.enableCors({
+    origin: configService.get<string>('frontendUrl'),
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
