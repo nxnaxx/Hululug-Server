@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CustomConfigModule } from 'src/config/config.module';
+import { CustomConfigModule } from '@config/config.module';
 import { AuthController } from './auth.controller';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';

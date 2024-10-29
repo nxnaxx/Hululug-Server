@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CustomConfigModule } from './config/config.module';
-import { DatabaseModule } from './database';
-import { AuthModule } from './auth/auth.module';
+import { CustomConfigModule } from '@config/config.module';
+import { DatabaseModule } from '@database/database.module';
+import { AuthModule } from '@auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
