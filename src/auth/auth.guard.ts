@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import {
+  BadRequestException,
   CanActivate,
   ExecutionContext,
   HttpException,
@@ -18,8 +19,7 @@ export class AuthGuard implements CanActivate {
 
     // 토큰이 존재하지 않다면 비로그인 상태
     if (!token) {
-      request.user = null;
-      return true;
+      throw new BadRequestException('액세스 토큰이 없습니다.');
     }
 
     // 토큰 검증
