@@ -1,33 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './schemas';
 import { Model } from 'mongoose';
-import { CreateProfileDto } from './dtos';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { User } from '../schemas';
+import { CreateProfileDto } from '../dtos';
 
 @Injectable()
-export class UsersService {
+export class SignUpService {
   constructor(
     private configService: ConfigService,
     private httpService: HttpService,
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
-  getUrl() {
-    const client_id = this.configService.get<string>('kakaoRestAPIKey');
-    const redirect_uri = this.configService.get<string>('kakaoRedirectUri');
-
-    return {
-      loginUrl: `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}`,
-    };
-  }
-
   async getKakaoUser(code: string) {
-    const accessToken = await this.getKakaoAccessToken(code);
-    const email = await this.getKakaoUserEmail(accessToken);
-    return { email, accessToken };
+    const access_token = await this.getKakaoAccessToken(code);
+    const email = await this.getKakaoUserEmail(access_token);
+    return { email, access_token };
   }
 
   private async getKakaoAccessToken(code: string): Promise<string> {
@@ -73,7 +64,7 @@ export class UsersService {
   async createUser(
     email: string,
     image: string,
-    accessToken: string,
+    access_token: string,
     createProfileDto: CreateProfileDto,
   ): Promise<User> {
     const { nickname, introduce } = createProfileDto;
@@ -81,11 +72,11 @@ export class UsersService {
       email,
       nickname,
       introduce,
-      profileImage: image,
-      accessToken,
+      profile_image: image,
+      access_token,
       bookmark: [],
-      myRecipes: [],
-      myComments: [],
+      my_recipes: [],
+      my_comments: [],
       likes: [],
     });
     return newUser.save();

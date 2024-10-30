@@ -13,19 +13,19 @@ export class User extends Document {
   introduce: string;
 
   @Prop()
-  profileImage: string;
+  profile_image: string;
 
   @Prop()
-  accessToken: string;
+  access_token: string;
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Recipe' }] })
   bookmark: MongooseSchema.Types.ObjectId[];
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Recipe' }] })
-  myRecipes: MongooseSchema.Types.ObjectId[];
+  my_recipes: MongooseSchema.Types.ObjectId[];
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Comment' }] })
-  myComments: MongooseSchema.Types.ObjectId[];
+  my_comments: MongooseSchema.Types.ObjectId[];
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Recipe' }] })
   likes: MongooseSchema.Types.ObjectId[];
