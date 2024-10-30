@@ -5,7 +5,7 @@ import { CustomConfigModule } from '@config/config.module';
 import { AuthController } from './auth.controller';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
-import { Test, TestSchema } from './test/test.schema';
+import { User, UserSchema } from '@modules/users/schemas';
 
 @Module({
   imports: [
@@ -16,10 +16,10 @@ import { Test, TestSchema } from './test/test.schema';
       }),
       inject: [ConfigService],
     }),
-    MongooseModule.forFeature([{ name: Test.name, schema: TestSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

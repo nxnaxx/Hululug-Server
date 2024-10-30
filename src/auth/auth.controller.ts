@@ -9,12 +9,8 @@ export class AuthController {
 
   // 토큰 생성 (추후 삭제)
   @Get('token')
-  async getJwtToken(
-    @Query('id') id: string,
-    @Query('name') name: string,
-    @Query('email') email: string,
-  ) {
-    return await this.authService.getJwtToken(id, name, email);
+  async getJwtToken(@Query('id') id: string) {
+    return await this.authService.getJwtToken(id);
   }
 
   // AuthGuard 테스트 (추후 삭제)

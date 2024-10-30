@@ -3,19 +3,19 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Test } from './test/test.schema';
+import { User } from '@modules/users/schemas';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
-    @InjectModel(Test.name) private readonly testModel: Model<Test>, // 변경 필요
+    @InjectModel(User.name) private readonly userModel: Model<User>, // 변경 필요
   ) {}
 
   // JWT 토큰 생성
-  async getJwtToken(id: string, name: string, email: string) {
-    const payload = { id, name, email };
+  async getJwtToken(id: string) {
+    const payload = { id };
 
     return {
       accessToken: this.jwtService.sign(payload, {
@@ -39,7 +39,7 @@ export class AuthService {
   // 회원인지 여부 확인(추후 모델 수정 필요)
   async verifyUser(userId: string): Promise<boolean> {
     const objectId = new Types.ObjectId(userId);
-    const user = await this.testModel.findOne({ _id: objectId });
+    const user = await this.userModel.findOne({ _id: objectId });
     return !!user;
   }
 }
