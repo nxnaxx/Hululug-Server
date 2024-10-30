@@ -1,0 +1,19 @@
+### 모든 레시피 불러오기(비로그인)
+GET http://localhost:3000/recipes
+
+### 모든 레시피 불러오기(로그인)
+GET http://localhost:3000/recipes
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA2MjA2MDFlODM4ZjA5ZjE4NzM5ZSIsIm5hbWUiOiLtm4Tro6jro6kiLCJlbWFpbCI6Imh1bHVsdWdAZ21haWwuY29tIiwiaWF0IjoxNzMwMTc5OTkwfQ.rTCUT5HnePxTWgaE-8yMbrMfZnvmQqE5Ds-HtDr08pY
+
+### 모든 레시피 불러오기(태그)
+GET http://localhost:3000/recipes?tag=6721aa637e7f8b4e11d49d4e
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA2MjA2MDFlODM4ZjA5ZjE4NzM5ZSIsIm5hbWUiOiLtm4Tro6jro6kiLCJlbWFpbCI6Imh1bHVsdWdAZ21haWwuY29tIiwiaWF0IjoxNzMwMTc5OTkwfQ.rTCUT5HnePxTWgaE-8yMbrMfZnvmQqE5Ds-HtDr08pY
+
+### 모든 레시피 불러오기(정렬: 오래된순)
+GET http://localhost:3000/recipes?sort=oldest
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA2MjA2MDFlODM4ZjA5ZjE4NzM5ZSIsIm5hbWUiOiLtm4Tro6jro6kiLCJlbWFpbCI6Imh1bHVsdWdAZ21haWwuY29tIiwiaWF0IjoxNzMwMTc5OTkwfQ.rTCUT5HnePxTWgaE-8yMbrMfZnvmQqE5Ds-HtDr08pY
+
+### 모든 레시피 불러오기(태그, 정렬)
+GET http://localhost:3000/recipes?tag=6721aa637e7f8b4e11d49d4e&sort=oldest
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjA2MjA2MDFlODM4ZjA5ZjE4NzM5ZSIsIm5hbWUiOiLtm4Tro6jro6kiLCJlbWFpbCI6Imh1bHVsdWdAZ21haWwuY29tIiwiaWF0IjoxNzMwMTc5OTkwfQ.rTCUT5HnePxTWgaE-8yMbrMfZnvmQqE5Ds-HtDr08pY
+
