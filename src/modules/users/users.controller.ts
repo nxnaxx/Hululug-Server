@@ -58,7 +58,12 @@ export class UsersController {
     const { accessToken } = await this.authService.getJwtToken(
       updatedUser._id.toString(),
     );
-    res.cookie('token', accessToken, { httpOnly: true });
+    res.cookie('token', accessToken, {
+      httpOnly: true,
+      maxAge: 5 * 60 * 60 * 1000,
+      secure: true,
+      sameSite: 'none',
+    });
 
     return {
       _id: updatedUser._id,
@@ -108,7 +113,12 @@ export class UsersController {
     const { accessToken } = await this.authService.getJwtToken(
       newUser._id.toString(),
     );
-    res.cookie('token', accessToken, { httpOnly: true });
+    res.cookie('token', accessToken, {
+      httpOnly: true,
+      maxAge: 5 * 60 * 60 * 1000,
+      secure: true,
+      sameSite: 'none',
+    });
 
     return {
       _id: newUser._id,
@@ -130,7 +140,8 @@ export class UsersController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log(req.user?.userId);
+    const id = req.user.userId;
+    await this.signOutService.signOut(id);
     res.clearCookie('token');
   }
 }
