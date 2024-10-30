@@ -1,7 +1,7 @@
 import { Controller, UseGuards, Query, Get, Req } from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
-import { Request } from 'express';
+import { UserId, UserIdParam } from '@common/decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -16,9 +16,8 @@ export class AuthController {
   // AuthGuard 테스트 (추후 삭제)
   @UseGuards(AuthGuard)
   @Get('status')
-  testGuard(@Req() request: Request) {
-    const userId = request.user?.userId;
-    if (!userId) return `비로그인 상태`;
-    return `작성자 ID: ${userId}`;
+  testGuard(@UserIdParam() id: UserId) {
+    if (!id) return `비로그인 상태`;
+    return `작성자 ID: ${id}`;
   }
 }
