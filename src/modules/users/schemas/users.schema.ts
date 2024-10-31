@@ -18,6 +18,9 @@ export class User extends Document {
   @Prop()
   access_token: string;
 
+  @Prop()
+  is_deleted: boolean;
+
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Recipe' }] })
   bookmark: MongooseSchema.Types.ObjectId[];
 

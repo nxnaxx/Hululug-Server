@@ -8,6 +8,7 @@ import {
   SignUpService,
   SignInService,
   SignOutService,
+  UpdateUserService,
 } from './services';
 import { AuthModule } from '@auth/auth.module';
 
@@ -18,6 +19,12 @@ import { AuthModule } from '@auth/auth.module';
     AuthModule,
   ],
   controllers: [UsersController],
-  providers: [GetUrlService, SignUpService, SignInService, SignOutService],
+  providers: [
+    GetUrlService,
+    SignUpService,
+    SignInService,
+    SignOutService,
+    UpdateUserService,
+  ],
 })
 export class UsersModule {}
