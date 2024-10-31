@@ -21,6 +21,7 @@ import {
   SignInService,
   SignOutService,
   UpdateUserService,
+  SignOffService,
 } from './services';
 import { AuthGuard } from '@auth/auth.guard';
 import { Request, Response } from 'express';
@@ -35,6 +36,7 @@ export class UsersController {
     private signUpService: SignUpService,
     private signOutService: SignOutService,
     private updateUserService: UpdateUserService,
+    private signOffService: SignOffService,
   ) {}
 
   // 카카오 로그인 url
@@ -188,5 +190,17 @@ export class UsersController {
       my_comments: updatedUser.my_comments,
       likes: updatedUser.likes,
     };
+  }
+
+  // 회원탈퇴
+  @Delete()
+  @UseGuards(AuthGuard)
+  async signOff(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const id = req.user.userId;
+    await this.signOffService.signOff(id);
+    res.clearCookie('token');
   }
 }

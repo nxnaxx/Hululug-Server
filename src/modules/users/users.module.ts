@@ -9,6 +9,7 @@ import {
   SignInService,
   SignOutService,
   UpdateUserService,
+  SignOffService,
 } from './services';
 import { AuthModule } from '@auth/auth.module';
 
@@ -25,6 +26,7 @@ import { AuthModule } from '@auth/auth.module';
     SignInService,
     SignOutService,
     UpdateUserService,
+    SignOffService,
   ],
 })
 export class UsersModule {}
