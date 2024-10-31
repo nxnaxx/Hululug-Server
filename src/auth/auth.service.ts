@@ -4,13 +4,14 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User } from '@modules/users/schemas';
+import { stringToObjectId } from 'src/utils';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
-    @InjectModel(User.name) private readonly userModel: Model<User>, // 변경 필요
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
   // JWT 토큰 생성
@@ -36,10 +37,11 @@ export class AuthService {
     }
   }
 
-  // 회원인지 여부 확인(추후 모델 수정 필요)
+  // 회원인지 여부 확인
   async verifyUser(userId: string): Promise<boolean> {
-    const objectId = new Types.ObjectId(userId);
-    const user = await this.userModel.findOne({ _id: objectId });
+    const user = await this.userModel.findOne({
+      _id: stringToObjectId(userId),
+    });
     return !!user;
   }
 }
