@@ -6,19 +6,21 @@ import {
   Get,
   NotFoundException,
   Post,
+  Put,
   Req,
   Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateProfileDto } from './dtos';
+import { CreateUserDto, UpdateUserDto } from './dtos';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   GetUrlService,
   SignUpService,
   SignInService,
   SignOutService,
+  UpdateUserService,
 } from './services';
 import { AuthGuard } from '@auth/auth.guard';
 import { Request, Response } from 'express';
@@ -32,6 +34,7 @@ export class UsersController {
     private signInService: SignInService,
     private signUpService: SignUpService,
     private signOutService: SignOutService,
+    private updateUserService: UpdateUserService,
   ) {}
 
   // 카카오 로그인 url
@@ -71,6 +74,7 @@ export class UsersController {
       nickname: updatedUser.nickname,
       introduce: updatedUser.introduce,
       profile_image: updatedUser.profile_image,
+      is_deleted: updatedUser.is_deleted,
       bookmark: updatedUser.bookmark,
       my_recipes: updatedUser.my_recipes,
       my_comments: updatedUser.my_comments,
@@ -80,13 +84,13 @@ export class UsersController {
 
   // 회원가입
   @Post()
-  @UseInterceptors(FileInterceptor('profileImage'))
+  @UseInterceptors(FileInterceptor('profile_image'))
   async signUp(
     @UploadedFile() profile_image: Express.Multer.File,
-    @Body() createProfileDto: CreateProfileDto,
+    @Body() createUserDto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { code, nickname } = createProfileDto;
+    const { code, nickname } = createUserDto;
 
     const nicknameCheck = await this.signUpService.nicknameCheck(nickname);
     if (nicknameCheck) {
@@ -102,16 +106,16 @@ export class UsersController {
 
     const image = await this.signUpService.uploadImage(profile_image);
 
-    const newUser = await this.signUpService.createUser(
+    const updatedUser = await this.signUpService.createUser(
       email,
       image,
       access_token,
-      createProfileDto,
+      createUserDto,
     );
 
     // 쿠키 생성
     const { accessToken } = await this.authService.getJwtToken(
-      newUser._id.toString(),
+      updatedUser._id.toString(),
     );
     res.cookie('token', accessToken, {
       httpOnly: true,
@@ -121,15 +125,16 @@ export class UsersController {
     });
 
     return {
-      _id: newUser._id,
-      email: newUser.email,
-      nickname: newUser.nickname,
-      introduce: newUser.introduce,
-      profile_image: newUser.profile_image,
-      bookmark: newUser.bookmark,
-      my_recipes: newUser.my_recipes,
-      my_comments: newUser.my_comments,
-      likes: newUser.likes,
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      nickname: updatedUser.nickname,
+      introduce: updatedUser.introduce,
+      profile_image: updatedUser.profile_image,
+      is_deleted: updatedUser.is_deleted,
+      bookmark: updatedUser.bookmark,
+      my_recipes: updatedUser.my_recipes,
+      my_comments: updatedUser.my_comments,
+      likes: updatedUser.likes,
     };
   }
 
@@ -143,5 +148,45 @@ export class UsersController {
     const id = req.user.userId;
     await this.signOutService.signOut(id);
     res.clearCookie('token');
+  }
+
+  // 회원정보 수정
+  @Put()
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('profile_image'))
+  async updateUser(
+    @UploadedFile() profile_image: Express.Multer.File,
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req: Request,
+  ) {
+    const { nickname, introduce } = updateUserDto;
+    const id = req.user.userId;
+
+    const nicknameCheck = await this.signUpService.nicknameCheck(nickname);
+    if (nicknameCheck) {
+      throw new ConflictException('이미 사용하고 있는 닉네임입니다');
+    }
+
+    const image = await this.signUpService.uploadImage(profile_image);
+
+    const updatedUser = await this.updateUserService.updateUser(
+      id,
+      nickname,
+      introduce,
+      image,
+    );
+
+    return {
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      nickname: updatedUser.nickname,
+      introduce: updatedUser.introduce,
+      profile_image: updatedUser.profile_image,
+      is_deleted: updatedUser.is_deleted,
+      bookmark: updatedUser.bookmark,
+      my_recipes: updatedUser.my_recipes,
+      my_comments: updatedUser.my_comments,
+      likes: updatedUser.likes,
+    };
   }
 }

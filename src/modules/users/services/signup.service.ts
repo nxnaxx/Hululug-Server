@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { User } from '../schemas';
-import { CreateProfileDto } from '../dtos';
+import { CreateUserDto } from '../dtos';
 
 @Injectable()
 export class SignUpService {
@@ -65,15 +65,16 @@ export class SignUpService {
     email: string,
     image: string,
     access_token: string,
-    createProfileDto: CreateProfileDto,
+    createUserDto: CreateUserDto,
   ): Promise<User> {
-    const { nickname, introduce } = createProfileDto;
+    const { nickname, introduce } = createUserDto;
     const newUser = new this.userModel({
       email,
       nickname,
       introduce,
       profile_image: image,
       access_token,
+      is_deleted: false,
       bookmark: [],
       my_recipes: [],
       my_comments: [],
