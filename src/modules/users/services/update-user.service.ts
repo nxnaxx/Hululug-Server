@@ -19,4 +19,11 @@ export class UpdateUserService {
       { new: true },
     );
   }
+
+  async nicknameCheck(id: string, nickname: string): Promise<boolean> {
+    const result = await this.userModel
+      .findOne({ _id: { $ne: id }, nickname })
+      .exec();
+    return !!result;
+  }
 }
