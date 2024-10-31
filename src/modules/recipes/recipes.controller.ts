@@ -14,4 +14,11 @@ export class RecipesController {
   getAllRecipes(@UserIdParam() userId: UserId, @Query() filters: FiltersDto) {
     return this.recipesService.getAllRecipes(userId, filters);
   }
+
+  // 레시피 검색
+  @UseGuards(AuthGuard)
+  @Get('search')
+  searchRecipes(@UserIdParam() userId: UserId, @Query('title') title: string) {
+    return this.recipesService.searchRecipes(userId, title);
+  }
 }

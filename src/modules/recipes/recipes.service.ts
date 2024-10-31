@@ -4,6 +4,7 @@ import { UserId } from '@common/decorators';
 import { FiltersDto } from './dto/filters.dto';
 import { RecipePreview } from './recipes.schema';
 import { RecipeMongoRepository } from './recipes.repository';
+import { decodeQueryParam, stringToObjectId } from 'src/utils';
 
 @Injectable()
 export class RecipesService {
@@ -12,19 +13,23 @@ export class RecipesService {
   private isRecipeBookmarked(recipe: RecipePreview, userId: UserId): boolean {
     if (!userId) return false;
     return recipe.bookmarks.some(
-      (bookmark) =>
-        bookmark.toString() === new Types.ObjectId(userId).toString(),
+      (bookmark) => bookmark.toString() === stringToObjectId(userId).toString(),
     );
   }
 
-  private addBookmarkStatus(recipes: RecipePreview[], userId: UserId) {
-    return recipes.map((recipe) => {
-      const { bookmarks, ...rest } = recipe;
+  private async createPreviewData(recipes: RecipePreview[], userId: UserId) {
+    const userPromises = recipes.map(async (recipe) => {
+      const { bookmarks, writer, ...rest } = recipe;
+      const user = await this.recipeRepository.findUser(writer);
+
       return {
         ...rest,
+        writer: user,
         is_bookmarked: this.isRecipeBookmarked(recipe, userId),
       };
     });
+
+    return Promise.all(userPromises);
   }
 
   async getAllRecipes(userId: UserId, filters: FiltersDto) {
@@ -38,7 +43,17 @@ export class RecipesService {
       return b.created_at.getTime() - a.created_at.getTime();
     });
 
-    const newRecipeData = this.addBookmarkStatus(recipes, userId);
+    const newRecipeData = await this.createPreviewData(recipes, userId);
+
+    return { recipes: newRecipeData };
+  }
+
+  async searchRecipes(userId: UserId, title: string) {
+    const recipes = await this.recipeRepository.findRecipes(
+      decodeQueryParam(title),
+    );
+
+    const newRecipeData = await this.createPreviewData(recipes, userId);
 
     return { recipes: newRecipeData };
   }
