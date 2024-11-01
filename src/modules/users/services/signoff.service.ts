@@ -35,9 +35,6 @@ export class SignOffService {
         access_token: '',
         is_deleted: true,
         bookmark: [],
-        my_recipes: [],
-        my_comments: [],
-        likes: [],
       },
       { new: true },
     );
