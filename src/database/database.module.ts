@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseService } from './database.service';
-import { CustomConfigModule } from '@config/config.module';
 
 @Module({
   imports: [
-    CustomConfigModule,
+    ConfigModule,
     MongooseModule.forRootAsync({
-      imports: [CustomConfigModule],
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         try {
