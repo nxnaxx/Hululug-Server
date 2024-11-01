@@ -46,14 +46,28 @@ export class SignUpService {
     return response.data.kakao_account.email;
   }
 
-  async emailCheck(email: string): Promise<boolean> {
-    const result = await this.userModel.findOne({ email }).exec();
+  async nicknameCheck(email: string, nickname: string): Promise<boolean> {
+    const result = await this.userModel
+      .findOne({ email: { $ne: email }, nickname })
+      .exec();
     return !!result;
   }
 
-  async nicknameCheck(nickname: string): Promise<boolean> {
-    const result = await this.userModel.findOne({ nickname }).exec();
-    return !!result;
+  async emailCheck(email: string): Promise<Number> {
+    const result1 = await this.userModel
+      .findOne({ email, is_deleted: false })
+      .exec();
+    if (!!result1) {
+      return 0;
+    }
+    const result2 = await this.userModel
+      .findOne({ email, is_deleted: true })
+      .exec();
+    if (!!result2) {
+      return 2;
+    } else {
+      return 1;
+    }
   }
 
   async uploadImage(profileImage: Express.Multer.File) {
@@ -81,5 +95,25 @@ export class SignUpService {
       likes: [],
     });
     return newUser.save();
+  }
+
+  async updateUser(
+    email: string,
+    nickname: string,
+    introduce: string,
+    image: string,
+    access_token: string,
+  ) {
+    return await this.userModel.findOneAndUpdate(
+      { email },
+      {
+        nickname,
+        introduce,
+        profile_image: image,
+        access_token,
+        is_deleted: false,
+      },
+      { new: true },
+    );
   }
 }

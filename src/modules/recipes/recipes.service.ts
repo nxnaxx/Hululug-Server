@@ -1,21 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { RecipePreview } from './recipes.schema';
 import { RecipeMongoRepository } from './recipes.repository';
+import { AWSService } from '@modules/aws/aws.service';
+import { UserId } from '@common/decorators';
+import { RecipePreview } from './schema/recipe-preview.schema';
+import { Recipe, RecipeDocument } from './schema/recipe.schema';
 import { GetRecipesDto, SearchRecipesDto } from './dto/get-recipes.dto';
 import { PaginationRecipesDto, ResRecipesDto } from './dto/res-recipes.dto';
+import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { decodeQueryParam, stringToObjectId } from 'src/utils';
 
 @Injectable()
 export class RecipesService {
-  constructor(private recipeRepository: RecipeMongoRepository) {}
+  constructor(
+    private recipeRepository: RecipeMongoRepository,
+    private awsService: AWSService,
+  ) {}
 
+  // writer Id 값으로 작성자 정보 추가
   private async addWriterInfo(
     recipes: RecipePreview[],
   ): Promise<ResRecipesDto[]> {
     const userPromises = recipes.map(async (recipe) => {
       const { writer, ...rest } = recipe;
-      const writerInfo = await this.recipeRepository.findUser(writer);
-      return { ...rest, writer: writerInfo };
+      const { nickname, profile_image } =
+        await this.recipeRepository.findUser(writer);
+      return { ...rest, writer: { nickname, profile_image } };
     });
     return Promise.all(userPromises);
   }
@@ -30,6 +39,7 @@ export class RecipesService {
       : String(lastRecipe.created_at.getTime());
   }
 
+  // 레시피 목록 조회
   async getRecipes(query: GetRecipesDto): Promise<PaginationRecipesDto> {
     const { limit, tag, sort, cursor } = query;
     let dbQuery = {};
@@ -83,6 +93,7 @@ export class RecipesService {
     return { recipes: paginatedRecipes, next_cursor: nextCursor };
   }
 
+  // 레시피 검색
   async searchRecipes(query: SearchRecipesDto): Promise<PaginationRecipesDto> {
     const { limit, keyword, cursor } = query;
     let cursorQuery = {};
@@ -106,5 +117,36 @@ export class RecipesService {
       : null;
 
     return { recipes: paginatedRecipes, next_cursor: nextCursor };
+  }
+
+  // 레시피 등록
+  async createRecipe(userId: UserId, data: CreateRecipeDto): Promise<Recipe> {
+    const imageUrl = await this.awsService.uploadImgToS3(data.thumbnail);
+    const createdRecipe = {
+      ...data,
+      thumbnail: imageUrl,
+      tags: data.tags.map((id) => stringToObjectId(id)),
+      writer: stringToObjectId(userId),
+      likes: 0,
+      comments: [],
+    };
+
+    return await this.recipeRepository.insertRecipe(createdRecipe);
+  }
+
+  // 레시피 프리뷰 등록
+  async addPreviewRecipe(recipe: RecipeDocument) {
+    const { title, thumbnail, tags, writer, likes, created_at } = recipe;
+    const createdRecipe = {
+      recipe_id: recipe._id,
+      title,
+      thumbnail,
+      tags,
+      writer,
+      likes,
+      created_at,
+    };
+
+    return await this.recipeRepository.insertPreview(createdRecipe);
   }
 }

@@ -9,7 +9,7 @@ export class SignInService {
 
   async saveToken(email: string, access_token: string) {
     const updatedUser = await this.userModel.findOneAndUpdate(
-      { email: email },
+      { email: email, is_deleted: false },
       { access_token: access_token },
       { new: true },
     );
