@@ -1,15 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
-export type RecipeDocument = HydratedDocument<RecipePreview>;
+export type RecipePreviewDocument = HydratedDocument<RecipePreview> & {
+  created_at: Date;
+};
 
-@Schema({ timestamps: { createdAt: 'created_at', updatedAt: false } })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: false },
+  versionKey: false,
+})
 export class RecipePreview {
-  @Prop({
-    required: true,
-    type: [{ type: Types.ObjectId, ref: 'Recipe' }],
-  })
-  recipe_id: Types.ObjectId[];
+  @Prop({ required: true })
+  recipe_id: Types.ObjectId;
 
   @Prop({ required: true })
   title: string;
@@ -22,9 +24,6 @@ export class RecipePreview {
     type: [{ type: Types.ObjectId, ref: 'Tag' }],
   })
   tags: Types.ObjectId[];
-
-  @Prop({ type: Date, default: Date.now })
-  created_at: Date;
 
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   writer: Types.ObjectId;

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, SortOrder, Types } from 'mongoose';
-import { RecipePreview } from './recipes.schema';
+import { RecipePreview } from './schema/recipe-preview.schema';
+import { Recipe } from './schema/recipe.schema';
 import { User } from '@modules/users/schemas';
 import { WriterDto } from './dto/res-recipes.dto';
 
@@ -19,12 +20,14 @@ export interface RecipeRepository {
   findUser(
     userId: Types.ObjectId,
   ): Promise<{ nickname: string; profile_image: string } | null>;
+  insertRecipe(recipes: Recipe): Promise<Recipe>;
 }
 
 @Injectable()
 export class RecipeMongoRepository implements RecipeRepository {
   constructor(
-    @InjectModel(RecipePreview.name) private recipeModel: Model<RecipePreview>,
+    @InjectModel(RecipePreview.name) private previewModel: Model<RecipePreview>,
+    @InjectModel(Recipe.name) private recipeModel: Model<Recipe>,
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
@@ -33,7 +36,7 @@ export class RecipeMongoRepository implements RecipeRepository {
     sortOption: { [key: string]: SortOrder },
     limit: number,
   ): Promise<RecipePreview[]> {
-    return await this.recipeModel
+    return await this.previewModel
       .find(dbQuery)
       .sort(sortOption)
       .limit(limit + 1) // nestCursor 위해서 +1
@@ -51,7 +54,7 @@ export class RecipeMongoRepository implements RecipeRepository {
       title: new RegExp(keyword, 'i'),
     }));
 
-    return await this.recipeModel
+    return await this.previewModel
       .find({ $and: [...regexes, dbQuery] })
       .sort({ created_at: -1 })
       .limit(limit + 1) // nestCursor 위해서 +1
@@ -61,8 +64,19 @@ export class RecipeMongoRepository implements RecipeRepository {
 
   async findUser(userId: Types.ObjectId): Promise<WriterDto | null> {
     return await this.userModel
-      .findOne({ _id: userId }, { _id: 0, nickname: 1, profile_image: 1 })
+      .findOne(
+        { _id: userId },
+        { _id: 0, nickname: 1, profile_image: 1, introduce: 1 },
+      )
       .lean()
       .exec();
+  }
+
+  async insertRecipe(recipes: Recipe): Promise<Recipe> {
+    return await new this.recipeModel(recipes).save();
+  }
+
+  async insertPreview(recipes: RecipePreview): Promise<RecipePreview> {
+    return await new this.previewModel(recipes).save();
   }
 }

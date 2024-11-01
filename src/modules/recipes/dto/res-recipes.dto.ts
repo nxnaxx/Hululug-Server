@@ -17,7 +17,7 @@ export class WriterDto {
 
 export class ResRecipesDto {
   @IsMongoId()
-  recipe_id: Types.ObjectId[];
+  recipe_id: Types.ObjectId;
 
   @IsString()
   title: string;
@@ -29,14 +29,14 @@ export class ResRecipesDto {
   @IsMongoId({ each: true })
   tags: Types.ObjectId[];
 
-  @IsDate()
-  created_at: Date;
-
   @IsString({ each: true })
   writer: WriterDto;
 
   @IsNumber()
   likes: number;
+
+  @IsDate()
+  created_at?: Date;
 }
 
 export class PaginationRecipesDto {

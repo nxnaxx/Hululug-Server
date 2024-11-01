@@ -1,5 +1,5 @@
 ### 토큰 얻기
-GET http://localhost:3000/auth/token?id=6720620601e838f09f18739e&name=후루룩&email=hululug@gmail.com
+GET http://localhost:3000/auth/token?id=672361b142a7d479b161b3c0
 
 ### Guard Test (logout)
 GET http://localhost:3000/auth/status
