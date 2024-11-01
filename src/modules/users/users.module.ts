@@ -12,12 +12,14 @@ import {
   SignOffService,
 } from './services';
 import { AuthModule } from '@auth/auth.module';
+import { AWSModule } from '@modules/aws/aws.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     HttpModule,
     AuthModule,
+    AWSModule,
   ],
   controllers: [UsersController],
   providers: [

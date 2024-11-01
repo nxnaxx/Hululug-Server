@@ -27,6 +27,7 @@ import { AuthGuard } from '@auth/auth.guard';
 import { Request, Response } from 'express';
 import { AuthService } from '@auth/auth.service';
 import { User } from './schemas';
+import { AWSService } from '@modules/aws/aws.service';
 
 @Controller('users')
 export class UsersController {
@@ -38,6 +39,7 @@ export class UsersController {
     private signOutService: SignOutService,
     private updateUserService: UpdateUserService,
     private signOffService: SignOffService,
+    private awsService: AWSService,
   ) {}
 
   // 카카오 로그인 url
@@ -109,7 +111,7 @@ export class UsersController {
       throw new ConflictException('이미 존재하는 사용자입니다');
     }
 
-    const image = await this.signUpService.uploadImage(profile_image);
+    const image = await this.awsService.uploadImgToS3(profile_image);
 
     let updatedUser: User;
 
@@ -187,7 +189,7 @@ export class UsersController {
       throw new ConflictException('이미 사용하고 있는 닉네임입니다');
     }
 
-    const image = await this.signUpService.uploadImage(profile_image);
+    const image = await this.awsService.uploadImgToS3(profile_image);
 
     const updatedUser = await this.updateUserService.updateUser(
       id,

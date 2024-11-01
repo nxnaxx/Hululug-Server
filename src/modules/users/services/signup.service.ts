@@ -70,11 +70,6 @@ export class SignUpService {
     }
   }
 
-  async uploadImage(profileImage: Express.Multer.File) {
-    // 추후 이미지 파일 서버 추가 필요
-    return 'test.png';
-  }
-
   async createUser(
     email: string,
     image: string,
