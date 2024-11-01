@@ -4,7 +4,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { getUUID } from 'src/utils';
 
 @Injectable()
-export class AwsService {
+export class AWSService {
   s3Client: S3Client;
 
   constructor(private configService: ConfigService) {
