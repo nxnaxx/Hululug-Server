@@ -144,7 +144,10 @@ export class RecipesService {
 
   // 레시피 등록
   async createRecipe(userId: UserId, data: CreateRecipeDto): Promise<Recipe> {
-    const imageUrl = await this.awsService.uploadImgToS3(data.thumbnail);
+    const imageUrl = await this.awsService.uploadImgToS3(
+      data.thumbnail,
+      'recipes',
+    );
     const createdRecipe = {
       ...data,
       thumbnail: imageUrl,

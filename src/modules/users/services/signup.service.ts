@@ -6,12 +6,14 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { User } from '../schemas';
 import { CreateUserDto } from '../dtos';
+import { AWSService } from '@modules/aws/aws.service';
 
 @Injectable()
 export class SignUpService {
   constructor(
     private configService: ConfigService,
     private httpService: HttpService,
+    private aWSService: AWSService,
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
@@ -99,6 +101,12 @@ export class SignUpService {
     image: string,
     access_token: string,
   ) {
+    const user = await this.userModel.findOne({ email });
+    await this.aWSService.deleteFileFromS3(
+      user.profile_image.split('/').pop(),
+      'profile',
+    );
+
     return await this.userModel.findOneAndUpdate(
       { email },
       {

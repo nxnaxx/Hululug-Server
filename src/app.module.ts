@@ -6,6 +6,7 @@ import { UsersModule } from '@modules/users/users.module';
 import { RecipesModule } from '@modules/recipes';
 import { AWSModule } from './modules/aws/aws.module';
 import { EventsModule } from '@modules/events/events.module';
+import { TagsModule } from './modules/tags/tags.module';
 import { CommentsModule } from '@modules/comments';
 
 @Module({
@@ -17,6 +18,7 @@ import { CommentsModule } from '@modules/comments';
     RecipesModule,
     AWSModule,
     EventsModule,
+    TagsModule,
     CommentsModule,
   ],
   controllers: [],

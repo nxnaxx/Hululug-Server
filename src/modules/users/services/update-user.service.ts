@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas';
 import { Model } from 'mongoose';
+import { AWSService } from '@modules/aws/aws.service';
 
 @Injectable()
 export class UpdateUserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    private aWSService: AWSService,
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) {}
 
   async updateUser(
     id: string,
@@ -13,6 +17,12 @@ export class UpdateUserService {
     introduce: string,
     image: string,
   ) {
+    const user = await this.userModel.findById(id);
+    await this.aWSService.deleteFileFromS3(
+      user.profile_image.split('/').pop(),
+      'profile',
+    );
+
     return await this.userModel.findByIdAndUpdate(
       id,
       { nickname, introduce, profile_image: image },
