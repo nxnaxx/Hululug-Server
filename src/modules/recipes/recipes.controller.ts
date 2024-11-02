@@ -78,7 +78,7 @@ export class RecipesController {
   ) {
     const recipeData: EditRecipeDto = { ...data, thumbnail };
     await this.recipesService.updateRecipe(
-      stringToObjectId(userId),
+      userId,
       stringToObjectId(recipeId),
       recipeData,
     );
@@ -92,10 +92,7 @@ export class RecipesController {
     @UserIdParam() userId: UserId,
     @Param('recipe_id') recipeId: string,
   ) {
-    await this.recipesService.deleteRecipe(
-      stringToObjectId(userId),
-      stringToObjectId(recipeId),
-    );
+    await this.recipesService.deleteRecipe(userId, stringToObjectId(recipeId));
     return;
   }
 }
