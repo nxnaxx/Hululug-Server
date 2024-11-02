@@ -17,6 +17,7 @@ import {
   ResRecipesDto,
   SearchRecipesDto,
 } from './dto';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class RecipesService {
@@ -126,6 +127,13 @@ export class RecipesService {
       : null;
 
     return { recipes: paginatedRecipes, next_cursor: nextCursor };
+  }
+
+  // 상세 레시피 조회
+  async getRecipeDetails(recipeID: Types.ObjectId) {
+    const recipe = await this.recipeRepository.findRecipeDetails(recipeID);
+    const writerInfo = await this.recipeRepository.findUser(recipe.writer);
+    return { ...recipe, writer: writerInfo };
   }
 
   // 레시피 등록

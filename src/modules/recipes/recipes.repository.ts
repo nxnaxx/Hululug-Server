@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, SortOrder, Types } from 'mongoose';
 import { RecipePreview } from './schema/recipe-preview.schema';
-import { Recipe } from './schema/recipe.schema';
+import { Recipe, RecipeDocument } from './schema/recipe.schema';
 import { User } from '@modules/users/schemas';
 import { WriterDto } from './dto/res-recipes.dto';
 import { EditRecipeDto } from './dto';
@@ -71,6 +71,10 @@ export class RecipeMongoRepository implements RecipeRepository {
       )
       .lean()
       .exec();
+  }
+
+  async findRecipeDetails(recipeId: Types.ObjectId): Promise<Recipe> {
+    return await this.recipeModel.findOne({ _id: recipeId }).lean().exec();
   }
 
   async insertRecipe(recipes: Recipe): Promise<Recipe> {

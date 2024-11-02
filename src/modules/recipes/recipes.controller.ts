@@ -1,3 +1,4 @@
+import { stringToObjectId } from 'src/utils';
 import {
   Body,
   Controller,
@@ -57,11 +58,19 @@ export class RecipesController {
     return;
   }
 
+  // 상세 레시피 조회
+  @Get(':recipe_id')
+  async getRecipeDetails(@Param('recipe_id') recipeId: string) {
+    return await this.recipesService.getRecipeDetails(
+      stringToObjectId(recipeId),
+    );
+  }
+
   // 레시피 수정
   @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('thumbnail'))
   @Put(':recipe_id')
-  async editRecipe(
+  async updateRecipe(
     @UserIdParam() userId: UserId,
     @Param('recipe_id') recipeId: string,
     @UploadedFile() thumbnail: Express.Multer.File,
