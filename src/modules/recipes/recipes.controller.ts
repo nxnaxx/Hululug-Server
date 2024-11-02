@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -14,7 +16,11 @@ import { RecipesService } from './recipes.service';
 import { UserId, UserIdParam } from '@common/decorators';
 import { RecipeDocument } from './schema/recipe.schema';
 import { GetRecipesDto, SearchRecipesDto } from './dto/get-recipes.dto';
-import { CreateRecipeDto, ReqRecipeDto } from './dto/create-recipe.dto';
+import {
+  CreateRecipeDto,
+  EditRecipeDto,
+  ReqRecipeDto,
+} from './dto/create-recipe.dto';
 
 @Controller('recipes')
 export class RecipesController {
@@ -48,6 +54,21 @@ export class RecipesController {
     )) as RecipeDocument;
 
     await this.recipesService.addPreviewRecipe(createdRecipe);
+    return;
+  }
+
+  // 레시피 수정
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('thumbnail'))
+  @Put(':recipe_id')
+  async editRecipe(
+    @UserIdParam() userId: UserId,
+    @Param('recipe_id') recipeId: string,
+    @UploadedFile() thumbnail: Express.Multer.File,
+    @Body() data: ReqRecipeDto,
+  ) {
+    const recipeData: EditRecipeDto = { ...data, thumbnail };
+    await this.recipesService.updateRecipe(userId, recipeId, recipeData);
     return;
   }
 }

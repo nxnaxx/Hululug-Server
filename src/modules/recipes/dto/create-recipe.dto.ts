@@ -33,3 +33,7 @@ export class ReqRecipeDto {
 export class CreateRecipeDto extends ReqRecipeDto {
   thumbnail: Express.Multer.File;
 }
+
+export class EditRecipeDto extends ReqRecipeDto {
+  thumbnail?: Express.Multer.File;
+}

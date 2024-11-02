@@ -1,11 +1,17 @@
 import { ConfigService } from '@nestjs/config';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { getUUID } from 'src/utils';
+import { generateFileHash } from 'src/utils';
 
 @Injectable()
 export class AWSService {
   s3Client: S3Client;
+  awsRegion = this.configService.get<string>('awsRegion');
+  awsS3BucketName = this.configService.get<string>('awsS3BucketName');
 
   constructor(private configService: ConfigService) {
     this.s3Client = new S3Client({
@@ -18,9 +24,7 @@ export class AWSService {
   }
 
   async uploadImgToS3(file: Express.Multer.File) {
-    const awsRegion = this.configService.get<string>('awsRegion');
-    const awsS3BucketName = this.configService.get<string>('awsS3BucketName');
-    const fileName = getUUID();
+    const fileName = generateFileHash(file.buffer);
     const ext = file.originalname.split('.').pop().toLowerCase();
     const allowedExtensions = ['png', 'jpg', 'jpeg'];
 
@@ -40,6 +44,29 @@ export class AWSService {
 
     await this.s3Client.send(uploadParams);
 
-    return `https://${awsS3BucketName}.s3.${awsRegion}.amazonaws.com/${fileName}`;
+    return `https://${this.awsS3BucketName}.s3.${this.awsRegion}.amazonaws.com/${fileName}`;
+  }
+
+  getS3Url(fileName: string): string {
+    return `https://${this.awsS3BucketName}.s3.${this.awsRegion}.amazonaws.com/${fileName}`;
+  }
+
+  async deleteFileFromS3(fileName: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: this.awsS3BucketName,
+      Key: fileName,
+    });
+
+    try {
+      const data = await this.s3Client.send(command);
+      console.log(`${this.awsS3BucketName}에서 ${fileName} 삭제 성공`);
+      return data;
+    } catch (error) {
+      console.error(
+        `${this.awsS3BucketName}에서 ${fileName} 삭제 실패:`,
+        error,
+      );
+      throw error;
+    }
   }
 }
