@@ -4,10 +4,19 @@ import { AWSService } from '@modules/aws/aws.service';
 import { UserId } from '@common/decorators';
 import { RecipePreview } from './schema/recipe-preview.schema';
 import { Recipe, RecipeDocument } from './schema/recipe.schema';
-import { GetRecipesDto, SearchRecipesDto } from './dto/get-recipes.dto';
-import { PaginationRecipesDto, ResRecipesDto } from './dto/res-recipes.dto';
-import { CreateRecipeDto } from './dto/create-recipe.dto';
-import { decodeQueryParam, stringToObjectId } from 'src/utils';
+import {
+  decodeQueryParam,
+  generateFileHash,
+  stringToObjectId,
+} from 'src/utils';
+import {
+  CreateRecipeDto,
+  EditRecipeDto,
+  GetRecipesDto,
+  PaginationRecipesDto,
+  ResRecipesDto,
+  SearchRecipesDto,
+} from './dto';
 
 @Injectable()
 export class RecipesService {
@@ -148,5 +157,33 @@ export class RecipesService {
     };
 
     return await this.recipeRepository.insertPreview(createdRecipe);
+  }
+
+  // 레시피 수정
+  async updateRecipe(userId: UserId, recipeId: string, data: EditRecipeDto) {
+    const id = stringToObjectId(recipeId);
+    const hash = generateFileHash(data.thumbnail.buffer);
+    const s3Url = this.awsService.getS3Url(hash);
+    const hasSameThumbnail = await this.recipeRepository.hasSameThumbnail(
+      stringToObjectId(recipeId),
+      s3Url,
+    );
+    const { thumbnail, ...rest } = data;
+    let updateData = {};
+
+    if (hasSameThumbnail) updateData = rest;
+    else {
+      const prevThumbnail = await this.recipeRepository.findThumbnail(id);
+      const imageUrl = await this.awsService.uploadImgToS3(data.thumbnail);
+      // thumbnail이 변경된 경우 S3에서 기존 파일 삭제
+      await this.awsService.deleteFileFromS3(prevThumbnail.split('/').pop());
+      updateData = { ...rest, thumbnail: imageUrl };
+    }
+
+    return await this.recipeRepository.updateRecipe(
+      stringToObjectId(userId),
+      stringToObjectId(recipeId),
+      updateData as EditRecipeDto,
+    );
   }
 }
