@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RecipeMongoRepository } from './recipes.repository';
+import { RecipeRepository } from './recipes.repository';
 import { AWSService } from '@modules/aws/aws.service';
 import { UserId } from '@common/decorators';
 import { RecipePreview } from './schema/recipe-preview.schema';
@@ -22,7 +22,7 @@ import { Types } from 'mongoose';
 @Injectable()
 export class RecipesService {
   constructor(
-    private recipeRepository: RecipeMongoRepository,
+    private recipeRepository: RecipeRepository,
     private awsService: AWSService,
   ) {}
 
@@ -47,6 +47,12 @@ export class RecipesService {
     return sort === 'popular'
       ? `${lastRecipe.likes}_${lastRecipe.created_at.getTime()}`
       : String(lastRecipe.created_at.getTime());
+  }
+
+  // S3에서 기존 파일 삭제
+  private async removeThumbFromS3(recipeId: Types.ObjectId) {
+    const prevThumbnail = await this.recipeRepository.findThumbnail(recipeId);
+    await this.awsService.deleteFileFromS3(prevThumbnail.split('/').pop());
   }
 
   // 레시피 목록 조회
@@ -112,7 +118,7 @@ export class RecipesService {
       cursorQuery = { created_at: { $lt: new Date(parseInt(cursor, 10)) } }; // cursor 날짜보다 이전
     }
 
-    const recipes = await this.recipeRepository.findRecipes(
+    const recipes = await this.recipeRepository.findRecipesByKeyword(
       decodeQueryParam(keyword),
       cursorQuery,
       limit,
@@ -130,8 +136,8 @@ export class RecipesService {
   }
 
   // 상세 레시피 조회
-  async getRecipeDetails(recipeID: Types.ObjectId) {
-    const recipe = await this.recipeRepository.findRecipeDetails(recipeID);
+  async getRecipeDetails(recipeId: Types.ObjectId) {
+    const recipe = await this.recipeRepository.findRecipeById(recipeId);
     const writerInfo = await this.recipeRepository.findUser(recipe.writer);
     return { ...recipe, writer: writerInfo };
   }
@@ -146,7 +152,7 @@ export class RecipesService {
       ...data,
       thumbnail: imageUrl,
       tags: data.tags.map((id) => stringToObjectId(id)),
-      writer: stringToObjectId(userId),
+      writer: userId,
       likes: 0,
       comments: [],
     };
@@ -155,7 +161,7 @@ export class RecipesService {
   }
 
   // 레시피 프리뷰 등록
-  async addPreviewRecipe(recipe: RecipeDocument) {
+  async addPreviewRecipe(recipe: RecipeDocument): Promise<RecipePreview> {
     const { title, thumbnail, tags, writer, likes, created_at } = recipe;
     const createdRecipe = {
       recipe_id: recipe._id,
@@ -171,12 +177,15 @@ export class RecipesService {
   }
 
   // 레시피 수정
-  async updateRecipe(userId: UserId, recipeId: string, data: EditRecipeDto) {
-    const id = stringToObjectId(recipeId);
+  async updateRecipe(
+    userId: Types.ObjectId,
+    recipeId: Types.ObjectId,
+    data: EditRecipeDto,
+  ) {
     const hash = generateFileHash(data.thumbnail.buffer);
     const s3Url = this.awsService.getS3Url(hash);
     const hasSameThumbnail = await this.recipeRepository.hasSameThumbnail(
-      stringToObjectId(recipeId),
+      recipeId,
       s3Url,
     );
     const { thumbnail, ...rest } = data;
@@ -184,23 +193,26 @@ export class RecipesService {
 
     if (hasSameThumbnail) updateData = rest;
     else {
-      const prevThumbnail = await this.recipeRepository.findThumbnail(id);
-      const imageUrl = await this.awsService.uploadImgToS3(
-        data.thumbnail,
-        'recipes',
-      );
-      // thumbnail이 변경된 경우 S3에서 기존 파일 삭제
-      await this.awsService.deleteFileFromS3(
-        prevThumbnail.split('/').pop(),
-        'recipes',
-      );
+      const imageUrl = await this.awsService.uploadImgToS3(data.thumbnail);
+      await this.removeThumbFromS3(recipeId);
       updateData = { ...rest, thumbnail: imageUrl };
     }
 
     return await this.recipeRepository.updateRecipe(
-      stringToObjectId(userId),
-      stringToObjectId(recipeId),
+      userId,
+      recipeId,
       updateData as EditRecipeDto,
     );
+  }
+
+  // 레시피 삭제
+  async deleteRecipe(
+    userId: Types.ObjectId,
+    recipeId: Types.ObjectId,
+  ): Promise<void> {
+    await this.recipeRepository.checkRecipeExists(recipeId, userId);
+    await this.removeThumbFromS3(recipeId);
+    await this.recipeRepository.deleteRecipe(userId, recipeId);
+    return;
   }
 }

@@ -4,10 +4,10 @@ import { AuthModule } from '@auth/auth.module';
 import { AWSModule } from '@modules/aws/aws.module';
 import { RecipePreview, PreviewSchema } from './schema/recipe-preview.schema';
 import { Recipe, RecipeSchema } from './schema/recipe.schema';
-import { User, UserSchema } from '@modules/users/schemas';
 import { RecipesController } from './recipes.controller';
+import { User, UserSchema } from '@modules/users/schemas';
 import { RecipesService } from './recipes.service';
-import { RecipeMongoRepository } from './recipes.repository';
+import { RecipeRepository } from './recipes.repository';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { RecipeMongoRepository } from './recipes.repository';
     AWSModule,
   ],
   controllers: [RecipesController],
-  providers: [RecipesService, RecipeMongoRepository],
-  exports: [RecipesService],
+  providers: [RecipesService, RecipeRepository],
+  exports: [RecipesService, RecipeRepository],
 })
 export class RecipesModule {}

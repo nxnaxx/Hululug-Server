@@ -2,6 +2,7 @@ import { stringToObjectId } from 'src/utils';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -39,6 +40,14 @@ export class RecipesController {
     return this.recipesService.searchRecipes(query);
   }
 
+  // 상세 레시피 조회
+  @Get(':recipe_id')
+  async getRecipeDetails(@Param('recipe_id') recipeId: string) {
+    return await this.recipesService.getRecipeDetails(
+      stringToObjectId(recipeId),
+    );
+  }
+
   // 레시피 등록
   @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('thumbnail'))
@@ -53,17 +62,8 @@ export class RecipesController {
       userId,
       recipeData,
     )) as RecipeDocument;
-
     await this.recipesService.addPreviewRecipe(createdRecipe);
-    return;
-  }
-
-  // 상세 레시피 조회
-  @Get(':recipe_id')
-  async getRecipeDetails(@Param('recipe_id') recipeId: string) {
-    return await this.recipesService.getRecipeDetails(
-      stringToObjectId(recipeId),
-    );
+    return { recipe_id: createdRecipe._id };
   }
 
   // 레시피 수정
@@ -77,7 +77,22 @@ export class RecipesController {
     @Body() data: ReqRecipeDto,
   ) {
     const recipeData: EditRecipeDto = { ...data, thumbnail };
-    await this.recipesService.updateRecipe(userId, recipeId, recipeData);
+    await this.recipesService.updateRecipe(
+      userId,
+      stringToObjectId(recipeId),
+      recipeData,
+    );
+    return;
+  }
+
+  // 레시피 삭제
+  @UseGuards(AuthGuard)
+  @Delete(':recipe_id')
+  async deleteRecipe(
+    @UserIdParam() userId: UserId,
+    @Param('recipe_id') recipeId: string,
+  ) {
+    await this.recipesService.deleteRecipe(userId, stringToObjectId(recipeId));
     return;
   }
 }

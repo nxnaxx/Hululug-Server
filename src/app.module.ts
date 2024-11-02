@@ -7,6 +7,7 @@ import { RecipesModule } from '@modules/recipes';
 import { AWSModule } from './modules/aws/aws.module';
 import { EventsModule } from '@modules/events/events.module';
 import { TagsModule } from './modules/tags/tags.module';
+import { CommentsModule } from '@modules/comments';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TagsModule } from './modules/tags/tags.module';
     AWSModule,
     EventsModule,
     TagsModule,
+    CommentsModule,
   ],
   controllers: [],
   providers: [],
