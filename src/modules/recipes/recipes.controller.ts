@@ -2,6 +2,7 @@ import { stringToObjectId } from 'src/utils';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -77,7 +78,25 @@ export class RecipesController {
     @Body() data: ReqRecipeDto,
   ) {
     const recipeData: EditRecipeDto = { ...data, thumbnail };
-    await this.recipesService.updateRecipe(userId, recipeId, recipeData);
+    await this.recipesService.updateRecipe(
+      stringToObjectId(userId),
+      stringToObjectId(recipeId),
+      recipeData,
+    );
+    return;
+  }
+
+  // 레시피 삭제
+  @UseGuards(AuthGuard)
+  @Delete(':recipe_id')
+  async deleteRecipe(
+    @UserIdParam() userId: UserId,
+    @Param('recipe_id') recipeId: string,
+  ) {
+    await this.recipesService.deleteRecipe(
+      stringToObjectId(userId),
+      stringToObjectId(recipeId),
+    );
     return;
   }
 }
