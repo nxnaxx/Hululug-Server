@@ -13,8 +13,8 @@ export class UpdateUserService {
     introduce: string,
     image: string,
   ) {
-    return await this.userModel.findOneAndUpdate(
-      { _id: id },
+    return await this.userModel.findByIdAndUpdate(
+      id,
       { nickname, introduce, profile_image: image },
       { new: true },
     );

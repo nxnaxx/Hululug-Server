@@ -8,6 +8,6 @@ export class WorldcupRamenInfoService {
   constructor(@InjectModel(Ramen.name) private ramenModel: Model<Ramen>) {}
 
   async getRamenInfo(id: string): Promise<Ramen> {
-    return await this.ramenModel.findOne({ _id: id }).exec();
+    return await this.ramenModel.findById(id).exec();
   }
 }
