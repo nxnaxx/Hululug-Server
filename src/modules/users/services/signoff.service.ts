@@ -29,8 +29,8 @@ export class SignOffService {
     }
 
     await this.unlinkKakaoAccount(accessToken);
-    await this.userModel.findOneAndUpdate(
-      { _id: id },
+    await this.userModel.findByIdAndUpdate(
+      id,
       {
         access_token: '',
         is_deleted: true,

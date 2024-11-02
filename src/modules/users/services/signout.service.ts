@@ -29,8 +29,8 @@ export class SignOutService {
     }
 
     await this.logoutKakaoAccount(accessToken);
-    await this.userModel.findOneAndUpdate(
-      { _id: id },
+    await this.userModel.findByIdAndUpdate(
+      id,
       { access_token: '' },
       { new: true },
     );

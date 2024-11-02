@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Ramen, RamenSchema, Worldcup, WorldcupSchema } from './schemas';
-import { WorldcupListService, WorldcupRamenInfoService } from './services';
+import {
+  WorldcupListService,
+  WorldcupRamenInfoService,
+  WorldcupSelectService,
+} from './services';
 import { WorldcupController } from './worldcup.controller';
 
 @Module({
@@ -12,6 +16,10 @@ import { WorldcupController } from './worldcup.controller';
     ]),
   ],
   controllers: [WorldcupController],
-  providers: [WorldcupListService, WorldcupRamenInfoService],
+  providers: [
+    WorldcupListService,
+    WorldcupRamenInfoService,
+    WorldcupSelectService,
+  ],
 })
 export class EventsModule {}
