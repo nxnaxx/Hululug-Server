@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RecipeMongoRepository } from './recipes.repository';
+import { RecipeRepository } from './recipes.repository';
 import { AWSService } from '@modules/aws/aws.service';
 import { UserId } from '@common/decorators';
 import { RecipePreview } from './schema/recipe-preview.schema';
@@ -22,7 +22,7 @@ import { Types } from 'mongoose';
 @Injectable()
 export class RecipesService {
   constructor(
-    private recipeRepository: RecipeMongoRepository,
+    private recipeRepository: RecipeRepository,
     private awsService: AWSService,
   ) {}
 
@@ -149,7 +149,7 @@ export class RecipesService {
       ...data,
       thumbnail: imageUrl,
       tags: data.tags.map((id) => stringToObjectId(id)),
-      writer: stringToObjectId(userId),
+      writer: userId,
       likes: 0,
       comments: [],
     };
@@ -207,7 +207,7 @@ export class RecipesService {
     userId: Types.ObjectId,
     recipeId: Types.ObjectId,
   ): Promise<void> {
-    await this.recipeRepository.checkRecipeExists(userId, recipeId);
+    await this.recipeRepository.checkRecipeExists(recipeId, userId);
     await this.removeThumbFromS3(recipeId);
     await this.recipeRepository.deleteRecipe(userId, recipeId);
     return;

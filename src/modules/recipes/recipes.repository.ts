@@ -11,40 +11,8 @@ import { User } from '@modules/users/schemas';
 import { WriterDto } from './dto/res-recipes.dto';
 import { EditRecipeDto } from './dto';
 
-export interface RecipeRepository {
-  filteredRecipes(
-    dbQuery: object,
-    sortOption: object,
-    limit: number,
-  ): Promise<RecipePreview[]>;
-  findRecipesByKeyword(
-    keyword: string,
-    dbQuery: { created_at: { $lt: number } } | {},
-    limit: number,
-  ): Promise<RecipePreview[]>;
-  findUser(userId: Types.ObjectId): Promise<WriterDto | null>;
-  findRecipeById(recipeId: Types.ObjectId): Promise<Recipe>;
-  checkRecipeExists(
-    userId: Types.ObjectId,
-    recipeId: Types.ObjectId,
-  ): Promise<boolean>;
-  insertRecipe(recipes: Recipe): Promise<Recipe>;
-  insertPreview(recipes: RecipePreview): Promise<RecipePreview>;
-  hasSameThumbnail(
-    recipeId: Types.ObjectId,
-    thumbnailUrl: string,
-  ): Promise<boolean>;
-  findThumbnail(recipeId: Types.ObjectId): Promise<string>;
-  updateRecipe(
-    userId: Types.ObjectId,
-    recipeId: Types.ObjectId,
-    data: EditRecipeDto,
-  ): Promise<void>;
-  deleteRecipe(userId: Types.ObjectId, recipeId: Types.ObjectId): Promise<void>;
-}
-
 @Injectable()
-export class RecipeMongoRepository implements RecipeRepository {
+export class RecipeRepository {
   constructor(
     @InjectModel(RecipePreview.name) private previewModel: Model<RecipePreview>,
     @InjectModel(Recipe.name) private recipeModel: Model<Recipe>,
@@ -105,15 +73,16 @@ export class RecipeMongoRepository implements RecipeRepository {
     return recipe;
   }
 
-  // userId와 recipeId가 일치하는 레시피 존재 여부 확인
+  // 레시피 존재 여부 확인
   async checkRecipeExists(
-    userId: Types.ObjectId,
     recipeId: Types.ObjectId,
+    userId?: Types.ObjectId,
   ): Promise<boolean> {
-    const recipeExists = await this.recipeModel.exists({
-      _id: recipeId,
-      writer: userId,
-    });
+    let query: object = { _id: recipeId };
+
+    if (userId) query = { ...query, writer: userId };
+
+    const recipeExists = await this.recipeModel.exists(query);
 
     if (!recipeExists) {
       throw new NotFoundException('레시피가 존재하지 않거나 권한이 없습니다.');
