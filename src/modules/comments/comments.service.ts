@@ -18,9 +18,17 @@ export class CommentsService {
       content,
     };
 
-    const commentId = await this.commentRepository.saveComment(newCommentData);
-    await this.commentRepository.saveMyComment(userId, commentId);
+    const comment = await this.commentRepository.saveComment(newCommentData);
+    await this.commentRepository.saveMyComment(userId, comment._id);
 
-    return { comment_id: commentId };
+    const writerInfo = await this.commentRepository.findWriter(userId);
+
+    return {
+      _id: comment._id,
+      writer: { ...writerInfo },
+      content,
+      created_at: comment.created_at,
+      updated_at: comment.updated_at,
+    };
   }
 }
