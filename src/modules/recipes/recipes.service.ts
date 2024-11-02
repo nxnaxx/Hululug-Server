@@ -138,7 +138,10 @@ export class RecipesService {
 
   // 레시피 등록
   async createRecipe(userId: UserId, data: CreateRecipeDto): Promise<Recipe> {
-    const imageUrl = await this.awsService.uploadImgToS3(data.thumbnail);
+    const imageUrl = await this.awsService.uploadImgToS3(
+      data.thumbnail,
+      'recipes',
+    );
     const createdRecipe = {
       ...data,
       thumbnail: imageUrl,
@@ -182,9 +185,15 @@ export class RecipesService {
     if (hasSameThumbnail) updateData = rest;
     else {
       const prevThumbnail = await this.recipeRepository.findThumbnail(id);
-      const imageUrl = await this.awsService.uploadImgToS3(data.thumbnail);
+      const imageUrl = await this.awsService.uploadImgToS3(
+        data.thumbnail,
+        'recipes',
+      );
       // thumbnail이 변경된 경우 S3에서 기존 파일 삭제
-      await this.awsService.deleteFileFromS3(prevThumbnail.split('/').pop());
+      await this.awsService.deleteFileFromS3(
+        prevThumbnail.split('/').pop(),
+        'recipes',
+      );
       updateData = { ...rest, thumbnail: imageUrl };
     }
 

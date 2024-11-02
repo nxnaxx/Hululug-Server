@@ -111,7 +111,7 @@ export class UsersController {
       throw new ConflictException('이미 존재하는 사용자입니다');
     }
 
-    const image = await this.awsService.uploadImgToS3(profile_image);
+    const image = await this.awsService.uploadImgToS3(profile_image, 'profile');
 
     let updatedUser: User;
 
@@ -189,7 +189,7 @@ export class UsersController {
       throw new ConflictException('이미 사용하고 있는 닉네임입니다');
     }
 
-    const image = await this.awsService.uploadImgToS3(profile_image);
+    const image = await this.awsService.uploadImgToS3(profile_image, 'profile');
 
     const updatedUser = await this.updateUserService.updateUser(
       id,
