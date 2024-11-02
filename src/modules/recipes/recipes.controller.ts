@@ -40,6 +40,14 @@ export class RecipesController {
     return this.recipesService.searchRecipes(query);
   }
 
+  // 상세 레시피 조회
+  @Get(':recipe_id')
+  async getRecipeDetails(@Param('recipe_id') recipeId: string) {
+    return await this.recipesService.getRecipeDetails(
+      stringToObjectId(recipeId),
+    );
+  }
+
   // 레시피 등록
   @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('thumbnail'))
@@ -54,17 +62,8 @@ export class RecipesController {
       userId,
       recipeData,
     )) as RecipeDocument;
-
     await this.recipesService.addPreviewRecipe(createdRecipe);
-    return;
-  }
-
-  // 상세 레시피 조회
-  @Get(':recipe_id')
-  async getRecipeDetails(@Param('recipe_id') recipeId: string) {
-    return await this.recipesService.getRecipeDetails(
-      stringToObjectId(recipeId),
-    );
+    return { recipe_id: createdRecipe._id };
   }
 
   // 레시피 수정

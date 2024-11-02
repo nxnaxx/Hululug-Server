@@ -158,7 +158,7 @@ export class RecipesService {
   }
 
   // 레시피 프리뷰 등록
-  async addPreviewRecipe(recipe: RecipeDocument) {
+  async addPreviewRecipe(recipe: RecipeDocument): Promise<RecipePreview> {
     const { title, thumbnail, tags, writer, likes, created_at } = recipe;
     const createdRecipe = {
       recipe_id: recipe._id,
