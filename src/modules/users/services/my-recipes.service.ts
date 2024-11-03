@@ -14,9 +14,11 @@ export class MyRecipesService {
 
   async getUserRecipes(id: string) {
     const user = await this.userModel.findById(id);
-    const recipe_preview = await this.recipePreviewModel.find({
-      recipe_id: { $in: user.my_recipes },
-    });
+    const recipe_preview = await this.recipePreviewModel
+      .find({
+        recipe_id: { $in: user.my_recipes },
+      })
+      .lean();
     return { recipe_preview };
   }
 }

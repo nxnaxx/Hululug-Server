@@ -6,3 +6,4 @@ export * from './update-user.service';
 export * from './signoff.service';
 export * from './bookmark.service';
 export * from './my-recipes.service';
+export * from './my-comments.service';

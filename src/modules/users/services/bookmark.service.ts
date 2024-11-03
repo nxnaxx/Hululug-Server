@@ -14,9 +14,11 @@ export class BookmarkService {
 
   async getUserBookmark(id: string) {
     const user = await this.userModel.findById(id);
-    const recipe_preview = await this.recipePreviewModel.find({
-      recipe_id: { $in: user.bookmark },
-    });
+    const recipe_preview = await this.recipePreviewModel
+      .find({
+        recipe_id: { $in: user.bookmark },
+      })
+      .lean();
     return { recipe_preview };
   }
 }
