@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Comment } from './schema/comment.schema';
 import { User } from '@modules/users/schemas';
 import { Recipe, RecipeRepository } from '@modules/recipes';
 import { UserId } from '@common/decorators';
-import { CommentWriterDto } from './dto';
+import { CommentWriterDto, CommentDBQueryDto } from './dto';
 
 @Injectable()
 export class CommentRepository {
@@ -34,7 +34,6 @@ export class CommentRepository {
     await this.userModel.findByIdAndUpdate(userId, {
       $push: { my_comments: commentId },
     });
-
     return;
   }
 
@@ -49,8 +48,34 @@ export class CommentRepository {
     return await this.commentModel
       .find({ recipe_id: recipeId })
       .sort({ created_at: 1 })
-      .select('-recipe_id')
+      .select({ recipe_id: 0 })
       .lean()
       .exec();
+  }
+
+  async updateComment(
+    query: CommentDBQueryDto,
+    content: string,
+  ): Promise<Comment[]> {
+    const { comment_id, recipe_id, writer } = query;
+    const commentExists = await this.commentModel.findOne({
+      _id: comment_id,
+      recipe_id: recipe_id,
+      writer: writer,
+    });
+
+    if (!commentExists) throw new NotFoundException('댓글을 찾을 수 없습니다.');
+    if (commentExists.content === content) {
+      throw new HttpException(
+        { status: 200, message: '댓글 변경 사항 없음' },
+        200,
+      );
+    }
+
+    return await this.commentModel.findOneAndUpdate(
+      { _id: comment_id },
+      { content: content },
+      { new: true, select: { writer: 0, recipe_id: 0, created_at: 0 } },
+    );
   }
 }

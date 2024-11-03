@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { CommentRepository } from './comments.repository';
 import { Comment } from './schema/comment.schema';
-import { CreateCommentDto, GetCommentDto } from './dto';
+import { CreateCommentDto, GetCommentDto, CommentDBQueryDto } from './dto';
 
 @Injectable()
 export class CommentsService {
@@ -43,8 +43,14 @@ export class CommentsService {
     };
   }
 
+  // 댓글 목록 조회
   async getComments(recipeId: Types.ObjectId) {
     const comments = await this.commentRepository.findComments(recipeId);
     return await this.addWriterInfo(comments);
+  }
+
+  // 댓글 내용 수정
+  async editComment(query: CommentDBQueryDto, content: string) {
+    return await this.commentRepository.updateComment(query, content);
   }
 }
