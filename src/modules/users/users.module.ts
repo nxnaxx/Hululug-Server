@@ -11,6 +11,7 @@ import {
   UpdateUserService,
   SignOffService,
   BookmarkService,
+  MyRecipesService,
 } from './services';
 import { AuthModule } from '@auth/auth.module';
 import { AWSModule } from '@modules/aws/aws.module';
@@ -35,6 +36,7 @@ import { PreviewSchema, RecipePreview } from '@modules/recipes';
     UpdateUserService,
     SignOffService,
     BookmarkService,
+    MyRecipesService,
   ],
 })
 export class UsersModule {}
