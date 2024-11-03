@@ -12,10 +12,12 @@ import {
   SignOffService,
   BookmarkService,
   MyRecipesService,
+  MyCommentsService,
 } from './services';
 import { AuthModule } from '@auth/auth.module';
 import { AWSModule } from '@modules/aws/aws.module';
 import { PreviewSchema, RecipePreview } from '@modules/recipes';
+import { Comment, CommentSchema } from '@modules/comments';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { PreviewSchema, RecipePreview } from '@modules/recipes';
     MongooseModule.forFeature([
       { name: RecipePreview.name, schema: PreviewSchema },
     ]),
+    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     HttpModule,
     AuthModule,
     AWSModule,
@@ -37,6 +40,7 @@ import { PreviewSchema, RecipePreview } from '@modules/recipes';
     SignOffService,
     BookmarkService,
     MyRecipesService,
+    MyCommentsService,
   ],
 })
 export class UsersModule {}

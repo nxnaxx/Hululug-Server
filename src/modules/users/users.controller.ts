@@ -24,6 +24,7 @@ import {
   SignOffService,
   BookmarkService,
   MyRecipesService,
+  MyCommentsService,
 } from './services';
 import { AuthGuard } from '@auth/auth.guard';
 import { Request, Response } from 'express';
@@ -44,6 +45,7 @@ export class UsersController {
     private awsService: AWSService,
     private bookmarkService: BookmarkService,
     private myRecipesService: MyRecipesService,
+    private myCommentsService: MyCommentsService,
   ) {}
 
   // 카카오 로그인 url
@@ -242,5 +244,13 @@ export class UsersController {
   async getUserRecipes(@Req() req: Request) {
     const id = req.user.userId;
     return await this.myRecipesService.getUserRecipes(id);
+  }
+
+  // 나의 댓글 조회
+  @Get('/comments')
+  @UseGuards(AuthGuard)
+  async getUserComments(@Req() req: Request) {
+    const id = req.user.userId;
+    return await this.myCommentsService.getUserComments(id);
   }
 }
