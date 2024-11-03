@@ -52,7 +52,10 @@ export class RecipesService {
   // S3에서 기존 파일 삭제
   private async removeThumbFromS3(recipeId: Types.ObjectId) {
     const prevThumbnail = await this.recipeRepository.findThumbnail(recipeId);
-    await this.awsService.deleteFileFromS3(prevThumbnail.split('/').pop());
+    await this.awsService.deleteFileFromS3(
+      prevThumbnail.split('/').pop(),
+      'recipes',
+    );
   }
 
   // 레시피 목록 조회
@@ -193,7 +196,10 @@ export class RecipesService {
 
     if (hasSameThumbnail) updateData = rest;
     else {
-      const imageUrl = await this.awsService.uploadImgToS3(data.thumbnail);
+      const imageUrl = await this.awsService.uploadImgToS3(
+        data.thumbnail,
+        'recipes',
+      );
       await this.removeThumbFromS3(recipeId);
       updateData = { ...rest, thumbnail: imageUrl };
     }

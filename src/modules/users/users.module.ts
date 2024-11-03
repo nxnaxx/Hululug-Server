@@ -10,13 +10,18 @@ import {
   SignOutService,
   UpdateUserService,
   SignOffService,
+  BookmarkService,
 } from './services';
 import { AuthModule } from '@auth/auth.module';
 import { AWSModule } from '@modules/aws/aws.module';
+import { PreviewSchema, RecipePreview } from '@modules/recipes';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: RecipePreview.name, schema: PreviewSchema },
+    ]),
     HttpModule,
     AuthModule,
     AWSModule,
@@ -29,6 +34,7 @@ import { AWSModule } from '@modules/aws/aws.module';
     SignOutService,
     UpdateUserService,
     SignOffService,
+    BookmarkService,
   ],
 })
 export class UsersModule {}
