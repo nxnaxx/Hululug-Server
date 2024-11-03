@@ -92,7 +92,9 @@ export class RecipesController {
     @UserIdParam() userId: UserId,
     @Param('recipe_id') recipeId: string,
   ) {
-    await this.recipesService.deleteRecipe(userId, stringToObjectId(recipeId));
-    return;
+    return await this.recipesService.deleteRecipe(
+      userId,
+      stringToObjectId(recipeId),
+    );
   }
 }

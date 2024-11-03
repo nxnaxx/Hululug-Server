@@ -52,7 +52,10 @@ export class RecipesService {
   // S3에서 기존 파일 삭제
   private async removeThumbFromS3(recipeId: Types.ObjectId) {
     const prevThumbnail = await this.recipeRepository.findThumbnail(recipeId);
-    await this.awsService.deleteFileFromS3(prevThumbnail.split('/').pop());
+    await this.awsService.deleteFileFromS3(
+      prevThumbnail.split('/').pop(),
+      'recipes',
+    );
   }
 
   // 레시피 목록 조회
@@ -139,6 +142,7 @@ export class RecipesService {
   async getRecipeDetails(recipeId: Types.ObjectId) {
     const recipe = await this.recipeRepository.findRecipeById(recipeId);
     const writerInfo = await this.recipeRepository.findUser(recipe.writer);
+
     return { ...recipe, writer: writerInfo };
   }
 
@@ -148,16 +152,17 @@ export class RecipesService {
       data.thumbnail,
       'recipes',
     );
-    const createdRecipe = {
+    const createdRecipe = await this.recipeRepository.saveRecipe({
       ...data,
       thumbnail: imageUrl,
       tags: data.tags.map((id) => stringToObjectId(id)),
       writer: userId,
       likes: 0,
       comments: [],
-    };
+    });
 
-    return await this.recipeRepository.insertRecipe(createdRecipe);
+    await this.recipeRepository.saveMyRecipe(userId, createdRecipe._id);
+    return createdRecipe;
   }
 
   // 레시피 프리뷰 등록
@@ -173,7 +178,7 @@ export class RecipesService {
       created_at,
     };
 
-    return await this.recipeRepository.insertPreview(createdRecipe);
+    return await this.recipeRepository.savePreview(createdRecipe);
   }
 
   // 레시피 수정
@@ -183,7 +188,7 @@ export class RecipesService {
     data: EditRecipeDto,
   ) {
     const hash = generateFileHash(data.thumbnail.buffer);
-    const s3Url = this.awsService.getS3Url(hash);
+    const s3Url = this.awsService.getS3Url(hash, 'recipes');
     const hasSameThumbnail = await this.recipeRepository.hasSameThumbnail(
       recipeId,
       s3Url,
@@ -193,7 +198,10 @@ export class RecipesService {
 
     if (hasSameThumbnail) updateData = rest;
     else {
-      const imageUrl = await this.awsService.uploadImgToS3(data.thumbnail);
+      const imageUrl = await this.awsService.uploadImgToS3(
+        data.thumbnail,
+        'recipes',
+      );
       await this.removeThumbFromS3(recipeId);
       updateData = { ...rest, thumbnail: imageUrl };
     }
@@ -211,8 +219,11 @@ export class RecipesService {
     recipeId: Types.ObjectId,
   ): Promise<void> {
     await this.recipeRepository.checkRecipeExists(recipeId, userId);
-    await this.removeThumbFromS3(recipeId);
-    await this.recipeRepository.deleteRecipe(userId, recipeId);
+    await Promise.all([
+      this.removeThumbFromS3(recipeId),
+      this.recipeRepository.deleteRecipe(userId, recipeId),
+      this.recipeRepository.deleteMyRecipe(userId, recipeId),
+    ]);
     return;
   }
 }

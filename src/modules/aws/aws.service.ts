@@ -71,8 +71,8 @@ export class AWSService {
     return `https://${this.awsS3BucketName}.s3.${this.awsRegion}.amazonaws.com/ramens/${fileName}`;
   }
 
-  getS3Url(fileName: string): string {
-    return `https://${this.awsS3BucketName}.s3.${this.awsRegion}.amazonaws.com/${fileName}`;
+  getS3Url(fileName: string, folder: string): string {
+    return `https://${this.awsS3BucketName}.s3.${this.awsRegion}.amazonaws.com/${folder}/${fileName}`;
   }
 
   async deleteFileFromS3(fileName: string, folder: string) {

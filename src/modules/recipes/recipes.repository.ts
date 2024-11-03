@@ -1,3 +1,4 @@
+import { UserId } from '@common/decorators';
 import {
   ForbiddenException,
   Injectable,
@@ -8,8 +9,7 @@ import { Model, SortOrder, Types } from 'mongoose';
 import { RecipePreview } from './schema/recipe-preview.schema';
 import { Recipe } from './schema/recipe.schema';
 import { User } from '@modules/users/schemas';
-import { WriterDto } from './dto/res-recipes.dto';
-import { EditRecipeDto } from './dto';
+import { WriterDto, EditRecipeDto } from './dto';
 
 @Injectable()
 export class RecipeRepository {
@@ -67,6 +67,7 @@ export class RecipeRepository {
   async findRecipeById(recipeId: Types.ObjectId): Promise<Recipe> {
     const recipe = await this.recipeModel
       .findOne({ _id: recipeId })
+      .select({ comments: 0 })
       .lean()
       .exec();
     if (!recipe) throw new NotFoundException('레시피가 존재하지 않습니다.');
@@ -91,12 +92,22 @@ export class RecipeRepository {
     return recipeExists !== null;
   }
 
-  async insertRecipe(recipes: Recipe): Promise<Recipe> {
+  async saveRecipe(recipes: Recipe): Promise<Recipe> {
     return await new this.recipeModel(recipes).save();
   }
 
-  async insertPreview(recipes: RecipePreview): Promise<RecipePreview> {
+  async savePreview(recipes: RecipePreview): Promise<RecipePreview> {
     return await new this.previewModel(recipes).save();
+  }
+
+  async saveMyRecipe(
+    userId: UserId,
+    recipeId: Types.ObjectId,
+  ): Promise<Recipe> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $push: { my_recipes: recipeId },
+    });
+    return;
   }
 
   // 동일한 thumbnail이 존재하는지 여부
@@ -150,13 +161,25 @@ export class RecipeRepository {
     userId: Types.ObjectId,
     recipeId: Types.ObjectId,
   ): Promise<void> {
-    await this.recipeModel.findOneAndDelete({
-      _id: recipeId,
-      writer: userId,
-    });
-    await this.previewModel.findOneAndDelete({
-      recipe_id: recipeId,
-      writer: userId,
+    await Promise.all([
+      this.recipeModel.findOneAndDelete({
+        _id: recipeId,
+        writer: userId,
+      }),
+      this.previewModel.findOneAndDelete({
+        recipe_id: recipeId,
+        writer: userId,
+      }),
+    ]);
+    return;
+  }
+
+  async deleteMyRecipe(
+    userId: UserId,
+    recipeId: Types.ObjectId,
+  ): Promise<Recipe> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $pull: { my_recipes: recipeId },
     });
     return;
   }
