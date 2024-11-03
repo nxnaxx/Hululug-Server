@@ -177,7 +177,7 @@ export class RecipeRepository {
   async deleteMyRecipe(
     userId: UserId,
     recipeId: Types.ObjectId,
-  ): Promise<Recipe> {
+  ): Promise<void> {
     await this.userModel.findByIdAndUpdate(userId, {
       $pull: { my_recipes: recipeId },
     });
