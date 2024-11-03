@@ -12,6 +12,8 @@ export type CommentDocument = HydratedDocument<Comment> & {
   versionKey: false,
 })
 export class Comment {
+  _id?: Types.ObjectId;
+
   @Prop({ required: true, type: Types.ObjectId, ref: 'Recipe' })
   recipe_id: Types.ObjectId;
 
@@ -20,6 +22,9 @@ export class Comment {
 
   @Prop({ required: true })
   content: string;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
