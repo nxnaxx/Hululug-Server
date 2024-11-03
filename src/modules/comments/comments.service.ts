@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { CommentRepository } from './comments.repository';
 import { Comment } from './schema/comment.schema';
-import { CreateCommentDto, GetCommentDto, CommentDBQueryDto } from './dto';
+import {
+  CreateCommentDto,
+  GetCommentDto,
+  CommentDBQueryDto,
+  DeleteQueryDto,
+} from './dto';
 
 @Injectable()
 export class CommentsService {
@@ -18,6 +23,7 @@ export class CommentsService {
     return Promise.all(commentPromises);
   }
 
+  // 댓글 생성
   async createComment(
     recipeId: Types.ObjectId,
     createCommentDto: CreateCommentDto,
@@ -52,5 +58,14 @@ export class CommentsService {
   // 댓글 내용 수정
   async editComment(query: CommentDBQueryDto, content: string) {
     return await this.commentRepository.updateComment(query, content);
+  }
+
+  // 댓글 삭제
+  async deleteComment(query: DeleteQueryDto) {
+    await Promise.all([
+      this.commentRepository.removeComment(query),
+      this.commentRepository.removeMyComment(query),
+    ]);
+    return;
   }
 }

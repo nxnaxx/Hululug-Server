@@ -1,11 +1,16 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Comment } from './schema/comment.schema';
 import { User } from '@modules/users/schemas';
 import { Recipe, RecipeRepository } from '@modules/recipes';
 import { UserId } from '@common/decorators';
-import { CommentWriterDto, CommentDBQueryDto } from './dto';
+import { CommentWriterDto, CommentDBQueryDto, DeleteQueryDto } from './dto';
 
 @Injectable()
 export class CommentRepository {
@@ -77,5 +82,30 @@ export class CommentRepository {
       { content: content },
       { new: true, select: { writer: 0, recipe_id: 0, created_at: 0 } },
     );
+  }
+
+  // 댓글 삭제
+  async removeComment(query: DeleteQueryDto) {
+    const comment = await this.commentModel.findById(query.comment_id);
+
+    if (!comment) {
+      throw new NotFoundException('삭제할 댓글이 존재하지 않습니다.');
+    }
+
+    if (comment.writer === query.writer) {
+      throw new ForbiddenException('댓글을 삭제할 권한이 없습니다.');
+    }
+
+    await this.commentModel.deleteOne({ _id: query.comment_id });
+    return;
+  }
+
+  // 내 댓글 삭제
+  async removeMyComment(query: DeleteQueryDto): Promise<void> {
+    const { writer, comment_id } = query;
+    await this.userModel.findByIdAndUpdate(writer, {
+      $pull: { my_comments: comment_id },
+    });
+    return;
   }
 }

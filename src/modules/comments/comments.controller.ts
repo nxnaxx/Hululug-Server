@@ -8,11 +8,13 @@ import {
   Patch,
   HttpException,
   HttpStatus,
+  Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthGuard } from '@auth/auth.guard';
 import { CommentsService } from './comments.service';
 import { UserId, UserIdParam } from '@common/decorators';
-import { ReqCommentDto } from './dto';
+import { CommentParamsDto, ReqCommentDto } from './dto';
 import { stringToObjectId } from 'src/utils';
 
 export class NoContentException extends HttpException {
@@ -71,5 +73,22 @@ export class CommentsController {
     };
 
     return await this.commentsService.editComment(query, data.content);
+  }
+
+  // 댓글 삭제
+  @UseGuards(AuthGuard)
+  @Delete(':comment_id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteComment(
+    @UserIdParam() userId: UserId,
+    @Param() deleteCommentDto: CommentParamsDto,
+  ) {
+    const { recipe_id, comment_id } = deleteCommentDto;
+    const query = {
+      writer: userId,
+      recipe_id,
+      comment_id,
+    };
+    return await this.commentsService.deleteComment(query);
   }
 }
