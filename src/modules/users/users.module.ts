@@ -21,11 +21,11 @@ import { Comment, CommentSchema } from '@modules/comments';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
       { name: RecipePreview.name, schema: PreviewSchema },
+      { name: Comment.name, schema: CommentSchema },
     ]),
-    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     HttpModule,
     AuthModule,
     AWSModule,
