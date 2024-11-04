@@ -17,18 +17,6 @@ import { UserId, UserIdParam } from '@common/decorators';
 import { CommentParamsDto, ReqCommentDto } from './dto';
 import { stringToObjectId } from 'src/utils';
 
-export class NoContentException extends HttpException {
-  constructor(message: string) {
-    super(
-      {
-        status: HttpStatus.NO_CONTENT,
-        message: message || 'No Content',
-      },
-      HttpStatus.NO_CONTENT,
-    );
-  }
-}
-
 @Controller('recipes/:recipe_id/comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
