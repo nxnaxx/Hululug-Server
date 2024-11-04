@@ -37,10 +37,3 @@ export class CreateRecipeDto extends ReqRecipeDto {
 export class EditRecipeDto extends ReqRecipeDto {
   thumbnail?: Express.Multer.File;
 }
-
-export type ToggleLikeAction = 'add' | 'remove';
-
-export class ToggleLikeDto {
-  @IsNotEmpty()
-  action: ToggleLikeAction;
-}

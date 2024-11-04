@@ -1,4 +1,3 @@
-import { stringToObjectId } from 'src/utils';
 import {
   Body,
   Controller,
@@ -17,13 +16,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { RecipesService } from './recipes.service';
 import { UserId, UserIdParam } from '@common/decorators';
 import { RecipeDocument } from './schema/recipe.schema';
-import { GetRecipesDto, SearchRecipesDto } from './dto/get-recipes.dto';
 import {
   CreateRecipeDto,
   EditRecipeDto,
+  GetRecipesDto,
   ReqRecipeDto,
-  ToggleLikeDto,
-} from './dto/create-recipe.dto';
+  SearchRecipesDto,
+  ToggleActionDto,
+} from './dto';
+import { stringToObjectId } from 'src/utils';
 
 @Controller('recipes')
 export class RecipesController {
@@ -105,12 +106,27 @@ export class RecipesController {
   async toggleLike(
     @UserIdParam() userId: UserId,
     @Param('recipe_id') recipeId: string,
-    @Body() toggleLikeDto: ToggleLikeDto,
+    @Body() toggleActionDto: ToggleActionDto,
   ) {
     return await this.recipesService.toggleLike(
       userId,
       stringToObjectId(recipeId),
-      toggleLikeDto.action,
+      toggleActionDto.action,
+    );
+  }
+
+  // 레시피 북마크 추가/취소
+  @UseGuards(AuthGuard)
+  @Post(':recipe_id/bookmark')
+  async toggleBookmark(
+    @UserIdParam() userId: UserId,
+    @Param('recipe_id') recipeId: string,
+    @Body() toggleActionDto: ToggleActionDto,
+  ) {
+    return await this.recipesService.toggleBookmark(
+      userId,
+      stringToObjectId(recipeId),
+      toggleActionDto.action,
     );
   }
 }
