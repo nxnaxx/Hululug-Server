@@ -125,6 +125,26 @@ export class RecipeRepository {
     return;
   }
 
+  async saveMyBookmark(
+    userId: UserId,
+    recipeId: Types.ObjectId,
+  ): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $push: { bookmark: recipeId },
+    });
+    return;
+  }
+
+  async removeMyBookmark(
+    userId: UserId,
+    recipeId: Types.ObjectId,
+  ): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $pull: { bookmark: recipeId },
+    });
+    return;
+  }
+
   // 동일한 thumbnail이 존재하는지 여부
   async hasSameThumbnail(
     recipeId: Types.ObjectId,
@@ -267,5 +287,38 @@ export class RecipeRepository {
     );
 
     return { likes: updatedRecipe.likes };
+  }
+
+  // 레시피 내 북마크 목록 추가
+  async addBookmark(userId: UserId, recipeId: Types.ObjectId): Promise<void> {
+    const bookmarkExists = await this.userModel.findOne({
+      _id: userId,
+      bookmark: { $in: [recipeId] },
+    });
+
+    if (bookmarkExists) {
+      throw new BadRequestException('이미 북마크가 존재합니다.');
+    }
+
+    return await this.saveMyBookmark(userId, recipeId);
+  }
+
+  // 레시피 내 북마크 목록 추가
+  async removeBookmark(
+    userId: UserId,
+    recipeId: Types.ObjectId,
+  ): Promise<void> {
+    const bookmarkExists = await this.userModel.findOne({
+      _id: userId,
+      bookmark: { $in: [recipeId] },
+    });
+
+    if (!bookmarkExists) {
+      throw new BadRequestException(
+        '북마크가 존재하지 않아 취소할 수 없습니다.',
+      );
+    }
+
+    return await this.removeMyBookmark(userId, recipeId);
   }
 }
