@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Worldcup } from '../schemas';
 import { Model } from 'mongoose';
+import { Ramen } from '../interface';
 
 @Injectable()
 export class WorldcupListService {
@@ -9,9 +10,14 @@ export class WorldcupListService {
     @InjectModel(Worldcup.name) private worldcupModel: Model<Worldcup>,
   ) {}
 
-  async getRamenList(): Promise<Worldcup> {
-    return await this.worldcupModel
-      .findOne({ _id: '67244c5dbd13fe2b2e6c8136' })
-      .exec();
+  async getRamenList(): Promise<{ ramen: Ramen[]; total_count: number }> {
+    const ramen = (await this.worldcupModel
+      .find()
+      .sort({ count: -1 })
+      .lean()) as Ramen[];
+
+    let total_count = ramen.reduce((acc, cur) => acc + cur.count, 0);
+
+    return { ramen, total_count };
   }
 }
