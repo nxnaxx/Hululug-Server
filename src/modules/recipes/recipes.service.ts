@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { RecipeRepository } from './recipes.repository';
 import { AWSService } from '@modules/aws/aws.service';
 import { UserId } from '@common/decorators';
@@ -16,6 +16,7 @@ import {
   PaginationRecipesDto,
   ResRecipesDto,
   SearchRecipesDto,
+  ToggleLikeAction,
 } from './dto';
 import { Types } from 'mongoose';
 
@@ -225,5 +226,18 @@ export class RecipesService {
       this.recipeRepository.deleteMyRecipe(userId, recipeId),
     ]);
     return;
+  }
+
+  // 레시피 좋아요
+  async toggleLike(
+    userId: Types.ObjectId,
+    recipeId: Types.ObjectId,
+    action: ToggleLikeAction,
+  ): Promise<{ likes: number }> {
+    if (action === 'add') {
+      return await this.recipeRepository.addLike(userId, recipeId);
+    } else if (action === 'remove') {
+      return await this.recipeRepository.removeLike(userId, recipeId);
+    } else throw new BadRequestException('유효하지 않은 요청입니다.');
   }
 }

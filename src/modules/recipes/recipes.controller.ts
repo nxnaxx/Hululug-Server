@@ -22,6 +22,7 @@ import {
   CreateRecipeDto,
   EditRecipeDto,
   ReqRecipeDto,
+  ToggleLikeDto,
 } from './dto/create-recipe.dto';
 
 @Controller('recipes')
@@ -95,6 +96,21 @@ export class RecipesController {
     return await this.recipesService.deleteRecipe(
       userId,
       stringToObjectId(recipeId),
+    );
+  }
+
+  // 레시피 좋아요 추가/취소
+  @UseGuards(AuthGuard)
+  @Post(':recipe_id/like')
+  async toggleLike(
+    @UserIdParam() userId: UserId,
+    @Param('recipe_id') recipeId: string,
+    @Body() toggleLikeDto: ToggleLikeDto,
+  ) {
+    return await this.recipesService.toggleLike(
+      userId,
+      stringToObjectId(recipeId),
+      toggleLikeDto.action,
     );
   }
 }

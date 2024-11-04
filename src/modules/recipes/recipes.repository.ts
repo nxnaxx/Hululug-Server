@@ -1,5 +1,6 @@
 import { UserId } from '@common/decorators';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -110,6 +111,20 @@ export class RecipeRepository {
     return;
   }
 
+  async saveMyLikes(userId: UserId, recipeId: Types.ObjectId): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $push: { likes: recipeId },
+    });
+    return;
+  }
+
+  async removeMyLikes(userId: UserId, recipeId: Types.ObjectId): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $pull: { likes: recipeId },
+    });
+    return;
+  }
+
   // 동일한 thumbnail이 존재하는지 여부
   async hasSameThumbnail(
     recipeId: Types.ObjectId,
@@ -182,5 +197,75 @@ export class RecipeRepository {
       $pull: { my_recipes: recipeId },
     });
     return;
+  }
+
+  // 레시피 좋아요 및 내 좋아요 목록 추가
+  async addLike(
+    userId: UserId,
+    recipeId: Types.ObjectId,
+  ): Promise<{ likes: number }> {
+    const likeExists = await this.userModel.findOne({
+      _id: userId,
+      likes: { $in: [recipeId] },
+    });
+
+    if (likeExists) throw new BadRequestException('이미 좋아요를 눌렀습니다.');
+
+    await Promise.all([
+      this.recipeModel.updateOne(
+        { _id: recipeId },
+        { $inc: { likes: 1 } },
+        { timestamps: false },
+      ),
+      this.previewModel.updateOne(
+        { recipe_id: recipeId },
+        { $inc: { likes: 1 } },
+      ),
+      this.saveMyLikes(userId, recipeId),
+    ]);
+
+    const updatedRecipe = await this.recipeModel.findOne(
+      { _id: recipeId },
+      { _id: 0, likes: 1 },
+    );
+
+    return { likes: updatedRecipe.likes };
+  }
+
+  // 레시피 좋아요 및 내 좋아요 목록 취소
+  async removeLike(
+    userId: UserId,
+    recipeId: Types.ObjectId,
+  ): Promise<{ likes: number }> {
+    const likeExists = await this.userModel.findOne({
+      _id: userId,
+      likes: { $in: [recipeId] },
+    });
+
+    if (!likeExists) {
+      throw new BadRequestException(
+        '레시피에 좋아요가 등록되지 않아 취소할 수 없습니다.',
+      );
+    }
+
+    await Promise.all([
+      this.recipeModel.updateOne(
+        { _id: recipeId, likes: { $gt: 0 } },
+        { $inc: { likes: -1 } },
+        { timestamps: false },
+      ),
+      this.previewModel.updateOne(
+        { recipe_id: recipeId, likes: { $gt: 0 } },
+        { $inc: { likes: -1 } },
+      ),
+      this.removeMyLikes(userId, recipeId),
+    ]);
+
+    const updatedRecipe = await this.recipeModel.findOne(
+      { _id: recipeId },
+      { _id: 0, likes: 1 },
+    );
+
+    return { likes: updatedRecipe.likes };
   }
 }
