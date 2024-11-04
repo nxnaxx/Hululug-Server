@@ -1,4 +1,6 @@
+import { Response } from 'express';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -107,11 +110,19 @@ export class RecipesController {
     @UserIdParam() userId: UserId,
     @Param('recipe_id') recipeId: string,
     @Body() toggleActionDto: ToggleActionDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
+    const { action } = toggleActionDto;
+    if (action === 'add') {
+      res.locals.customMessage = '좋아요를 추가했습니다.';
+    } else if (action === 'remove') {
+      res.locals.customMessage = '좋아요를 취소했습니다.';
+    } else throw new BadRequestException('유효하지 않은 요청입니다.');
+
     return await this.recipesService.toggleLike(
       userId,
       stringToObjectId(recipeId),
-      toggleActionDto.action,
+      action,
     );
   }
 
@@ -122,11 +133,19 @@ export class RecipesController {
     @UserIdParam() userId: UserId,
     @Param('recipe_id') recipeId: string,
     @Body() toggleActionDto: ToggleActionDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
+    const { action } = toggleActionDto;
+    if (action === 'add') {
+      res.locals.customMessage = '북마크를 추가했습니다.';
+    } else if (action === 'remove') {
+      res.locals.customMessage = '북마크를 취소했습니다.';
+    } else throw new BadRequestException('유효하지 않은 요청입니다.');
+
     return await this.recipesService.toggleBookmark(
       userId,
       stringToObjectId(recipeId),
-      toggleActionDto.action,
+      action,
     );
   }
 }

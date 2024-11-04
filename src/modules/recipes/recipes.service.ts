@@ -234,11 +234,9 @@ export class RecipesService {
     recipeId: Types.ObjectId,
     action: ToggleAction,
   ): Promise<{ likes: number }> {
-    if (action === 'add') {
-      return await this.recipeRepository.addLike(userId, recipeId);
-    } else if (action === 'remove') {
-      return await this.recipeRepository.removeLike(userId, recipeId);
-    } else throw new BadRequestException('유효하지 않은 요청입니다.');
+    return action === 'add'
+      ? await this.recipeRepository.addLike(userId, recipeId)
+      : await this.recipeRepository.removeLike(userId, recipeId);
   }
 
   // 레시피 북마크
@@ -247,10 +245,8 @@ export class RecipesService {
     recipeId: Types.ObjectId,
     action: ToggleAction,
   ): Promise<void> {
-    if (action === 'add') {
-      return await this.recipeRepository.addBookmark(userId, recipeId);
-    } else if (action === 'remove') {
-      return await this.recipeRepository.removeBookmark(userId, recipeId);
-    } else throw new BadRequestException('유효하지 않은 요청입니다.');
+    return action === 'add'
+      ? await this.recipeRepository.addBookmark(userId, recipeId)
+      : await this.recipeRepository.removeBookmark(userId, recipeId);
   }
 }
