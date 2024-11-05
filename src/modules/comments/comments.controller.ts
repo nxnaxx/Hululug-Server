@@ -6,7 +6,6 @@ import {
   UseGuards,
   Get,
   Patch,
-  HttpException,
   HttpStatus,
   Delete,
   HttpCode,

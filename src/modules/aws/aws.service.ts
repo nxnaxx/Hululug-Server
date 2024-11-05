@@ -12,6 +12,7 @@ export class AWSService {
   s3Client: S3Client;
   awsRegion = this.configService.get<string>('awsRegion');
   awsS3BucketName = this.configService.get<string>('awsS3BucketName');
+  awsCloudFront = this.configService.get<string>('awsCloudFront');
 
   constructor(private configService: ConfigService) {
     this.s3Client = new S3Client({
@@ -38,41 +39,16 @@ export class AWSService {
       Bucket: this.configService.get<string>('awsS3BucketName'),
       Key: `${folder}/${fileName}`,
       Body: file.buffer,
-      ACL: 'public-read',
       ContentType: `image/${ext}`,
     });
 
     await this.s3Client.send(uploadParams);
 
-    return `https://${this.awsS3BucketName}.s3.${this.awsRegion}.amazonaws.com/${folder}/${fileName}`;
-  }
-
-  async uploadImgToS3_2(file: Express.Multer.File) {
-    const fileName = generateFileHash(file.buffer);
-    const ext = file.originalname.split('.').pop().toLowerCase();
-    const allowedExtensions = ['png', 'jpg', 'jpeg'];
-
-    if (!allowedExtensions.includes(ext)) {
-      throw new BadRequestException(
-        '잘못된 파일 형식입니다. PNG, JPG, JPEG만 허용됩니다.',
-      );
-    }
-
-    const uploadParams = new PutObjectCommand({
-      Bucket: this.configService.get<string>('awsS3BucketName'),
-      Key: `ramens/${fileName}`,
-      Body: file.buffer,
-      ACL: 'public-read',
-      ContentType: `image/${ext}`,
-    });
-
-    await this.s3Client.send(uploadParams);
-
-    return `https://${this.awsS3BucketName}.s3.${this.awsRegion}.amazonaws.com/ramens/${fileName}`;
+    return `https://${this.awsCloudFront}/${folder}/${fileName}`;
   }
 
   getS3Url(fileName: string, folder: string): string {
-    return `https://${this.awsS3BucketName}.s3.${this.awsRegion}.amazonaws.com/${folder}/${fileName}`;
+    return `https://${this.awsCloudFront}/${folder}/${fileName}`;
   }
 
   async deleteFileFromS3(fileName: string, folder: string) {
