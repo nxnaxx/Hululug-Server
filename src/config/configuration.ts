@@ -9,4 +9,5 @@ export default () => ({
   awsS3AccessKey: process.env.AWS_S3_ACCESS_KEY,
   awsS3SecretKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
   awsRegion: process.env.AWS_REGION,
+  awsCloudFront: process.env.AWS_CLOUDFRONT,
 });

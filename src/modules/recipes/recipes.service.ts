@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RecipeRepository } from './recipes.repository';
 import { AWSService } from '@modules/aws/aws.service';
 import { UserId } from '@common/decorators';
