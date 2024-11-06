@@ -13,6 +13,9 @@ export class WriterDto {
 
   @IsString()
   profile_image: string;
+
+  @IsString()
+  introduce?: string;
 }
 
 export class ResRecipesDto {
