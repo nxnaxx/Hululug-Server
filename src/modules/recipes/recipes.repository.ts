@@ -54,14 +54,25 @@ export class RecipeRepository {
   }
 
   // userId로 유저 정보 반환
-  async findUser(userId: Types.ObjectId): Promise<WriterDto | null> {
-    return await this.userModel
+  async findUser(userId: Types.ObjectId): Promise<WriterDto> {
+    const user = await this.userModel
       .findOne(
         { _id: userId },
         { _id: 0, nickname: 1, profile_image: 1, introduce: 1 },
       )
       .lean()
       .exec();
+
+    if (!user) {
+      return {
+        nickname: '익명',
+        profile_image:
+          'https://dr4twgka8dxga.cloudfront.net/profile/3ed5d0f311178bec20bb5263c42b81f3954ace60c6e718b10c84507d8d0ade04',
+        introduce: '자기소개가 없습니다.',
+      };
+    }
+
+    return user;
   }
 
   // 레시피 상세 불러오기
