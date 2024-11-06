@@ -9,10 +9,12 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const frontendUrl = configService.get<string>('frontendUrl');
+  const localUrl = configService.get<string>('localUrl');
 
   app.use(cookieParser());
   app.enableCors({
-    origin: configService.get<string>('frontendUrl'),
+    origin: localUrl ? [frontendUrl, localUrl] : [frontendUrl],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
