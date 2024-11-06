@@ -40,6 +40,7 @@ export class AWSService {
       Key: `${folder}/${fileName}`,
       Body: file.buffer,
       ContentType: `image/${ext}`,
+      ACL: 'bucket-owner-full-control',
     });
 
     await this.s3Client.send(uploadParams);
