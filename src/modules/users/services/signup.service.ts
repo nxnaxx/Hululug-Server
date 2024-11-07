@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
 import { User } from '../schemas';
 import { CreateUserDto } from '../dtos';
 import { AWSService } from '@modules/aws/aws.service';
@@ -11,42 +8,9 @@ import { AWSService } from '@modules/aws/aws.service';
 @Injectable()
 export class SignUpService {
   constructor(
-    private configService: ConfigService,
-    private httpService: HttpService,
     private aWSService: AWSService,
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
-
-  async getKakaoUser(code: string) {
-    const access_token = await this.getKakaoAccessToken(code);
-    const email = await this.getKakaoUserEmail(access_token);
-    return { email, access_token };
-  }
-
-  private async getKakaoAccessToken(code: string): Promise<string> {
-    const requestUrl = 'https://kauth.kakao.com/oauth/token';
-    const params = {
-      grant_type: 'authorization_code',
-      client_id: this.configService.get('kakaoRestAPIKey'),
-      redirect_uri: this.configService.get('kakaoRedirectUri'),
-      code,
-    };
-
-    const response = await firstValueFrom(
-      this.httpService.post(requestUrl, null, { params }),
-    );
-    return response.data.access_token;
-  }
-
-  private async getKakaoUserEmail(accessToken: string): Promise<string> {
-    const userInfoUrl = 'https://kapi.kakao.com/v2/user/me';
-    const headers = { Authorization: `Bearer ${accessToken}` };
-
-    const response = await firstValueFrom(
-      this.httpService.get(userInfoUrl, { headers }),
-    );
-    return response.data.kakao_account.email;
-  }
 
   async nicknameCheck(email: string, nickname: string): Promise<boolean> {
     const result = await this.userModel
@@ -72,19 +36,14 @@ export class SignUpService {
     }
   }
 
-  async createUser(
-    email: string,
-    image: string,
-    access_token: string,
-    createUserDto: CreateUserDto,
-  ): Promise<User> {
-    const { nickname, introduce } = createUserDto;
+  async createUser(image: string, createUserDto: CreateUserDto): Promise<User> {
+    const { email, nickname, introduce } = createUserDto;
     const newUser = new this.userModel({
       email,
       nickname,
       introduce,
       profile_image: image,
-      access_token,
+      access_token: '',
       is_deleted: false,
       bookmark: [],
       my_recipes: [],
@@ -99,7 +58,6 @@ export class SignUpService {
     nickname: string,
     introduce: string,
     image: string,
-    access_token: string,
   ) {
     const user = await this.userModel.findOne({ email });
     await this.aWSService.deleteFileFromS3(
@@ -113,7 +71,6 @@ export class SignUpService {
         nickname,
         introduce,
         profile_image: image,
-        access_token,
         is_deleted: false,
       },
       { new: true },
