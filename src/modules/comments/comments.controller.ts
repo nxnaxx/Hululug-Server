@@ -65,7 +65,6 @@ export class CommentsController {
   // 댓글 삭제
   @UseGuards(AuthGuard)
   @Delete(':comment_id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(
     @UserIdParam() userId: UserId,
     @Param() deleteCommentDto: CommentParamsDto,

@@ -16,7 +16,7 @@ async function bootstrap() {
   app.enableCors({
     origin: localUrl ? [frontendUrl, localUrl] : [frontendUrl],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
   app.useGlobalPipes(
