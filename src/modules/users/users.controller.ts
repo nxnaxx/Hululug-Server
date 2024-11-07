@@ -60,11 +60,11 @@ export class UsersController {
     @Body('code') code: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { email, access_token } = await this.signUpService.getKakaoUser(code);
+    const { email, access_token } = await this.signInService.getKakaoUser(code);
 
     const updatedUser = await this.signInService.saveToken(email, access_token);
     if (!updatedUser) {
-      throw new NotFoundException('존재하지 않는 사용자입니다');
+      throw new NotFoundException(`존재하지 않는 사용자입니다 : ${email}`);
     }
 
     // 쿠키 생성
@@ -98,11 +98,8 @@ export class UsersController {
   async signUp(
     @UploadedFile() profile_image: Express.Multer.File,
     @Body() createUserDto: CreateUserDto,
-    @Res({ passthrough: true }) res: Response,
   ) {
-    const { nickname, introduce, code } = createUserDto;
-
-    const { email, access_token } = await this.signUpService.getKakaoUser(code);
+    const { email, nickname, introduce } = createUserDto;
 
     const nicknameCheck = await this.signUpService.nicknameCheck(
       email,
@@ -122,45 +119,15 @@ export class UsersController {
     let updatedUser: User;
 
     if (emailCheck === 1) {
-      updatedUser = await this.signUpService.createUser(
-        email,
-        image,
-        access_token,
-        createUserDto,
-      );
+      updatedUser = await this.signUpService.createUser(image, createUserDto);
     } else {
       updatedUser = await this.signUpService.updateUser(
         email,
         nickname,
         introduce,
         image,
-        access_token,
       );
     }
-
-    // 쿠키 생성
-    const { accessToken } = await this.authService.getJwtToken(
-      updatedUser._id.toString(),
-    );
-    res.cookie('token', accessToken, {
-      httpOnly: true,
-      maxAge: 5 * 60 * 60 * 1000,
-      secure: true,
-      sameSite: 'none',
-    });
-
-    return {
-      _id: updatedUser._id,
-      email: updatedUser.email,
-      nickname: updatedUser.nickname,
-      introduce: updatedUser.introduce,
-      profile_image: updatedUser.profile_image,
-      is_deleted: updatedUser.is_deleted,
-      bookmark: updatedUser.bookmark,
-      my_recipes: updatedUser.my_recipes,
-      my_comments: updatedUser.my_comments,
-      likes: updatedUser.likes,
-    };
   }
 
   // 로그아웃
