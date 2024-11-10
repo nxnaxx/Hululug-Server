@@ -182,17 +182,26 @@ src/
 root directory에 `.env`파일을 생성하고 아래와 같이 작성합니다. \*는 필수값
 
 ```
-PORT={포트 번호}
-FRONTEND_URL={프론트엔드 URL}*
-LOCAL_URL={프론트엔드 로컬 URL}
-DATABASE_URL={MongoDB 데이터베이스 URL}*
+# 서버 구성
+PORT={서버 포트 번호}
+FRONTEND_URL={클라이언트 URL}*
+LOCAL_URL={클라이언트 로컬 URL}
+
+# DB
+DATABASE_URL={MongoDB URL}*
+
+# 인증
 JWT_SECRET={JWT 시크릿 키}*
 KAKAO_REST_API_KEY={카카오 REST API 키}*
 KAKAO_REDIRECT_URI={카카오 리디렉트 URI}*
+
+# AWS S3
 AWS_S3_BUCKET_NAME={AWS S3 버킷명}*
 AWS_S3_ACCESS_KEY={AWS S3 액세스 키}*
 AWS_S3_SECRET_ACCESS_KEY={AWS S3 시크릿 액세스 키}*
-AWS_REGION={AWS S3 버킷 리전}*
+AWS_REGION={AWS S3 리전}*
+
+# CDN
 AWS_CLOUDFRONT={AWS CloudFront 도메인}*
 ```
 
@@ -226,6 +235,4 @@ yarn start:prod
 
 **API 문서**
 
-(추가 예정)
-
-<a href=""><img src="https://img.shields.io/badge/swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=white"></a>
+<a href="https://hululug-server-prod.up.railway.app/api"><img src="https://img.shields.io/badge/swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=white"></a>
