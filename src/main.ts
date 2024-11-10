@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from '@common/filters';
 import { TransformInterceptor } from '@common/interceptors';
 import * as cookieParser from 'cookie-parser';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,6 +32,25 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
+
+  const config = new DocumentBuilder()
+    .setTitle('후루룩(Hululug)')
+    .setDescription('나만의 라면 레시피 공유 플랫폼')
+    .setVersion('1.0')
+    .addCookieAuth('token')
+    .addServer('http://localhost:3000', 'local')
+    .addServer('https://hululug-server-dev.up.railway.app', 'develop')
+    .addServer('https://hululug-server-prod.up.railway.app', 'production')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory, {
+    swaggerOptions: {
+      requestInterceptor: (req) => {
+        req.credentials = 'include';
+        return req;
+      },
+    },
+  });
 
   await app.listen(port);
 }
