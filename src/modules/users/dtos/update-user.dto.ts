@@ -18,7 +18,8 @@ export class UpdateUserDto {
   introduce: string;
 
   @ApiProperty({
-    type: File,
+    type: String,
+    format: 'binary',
     example: 'File',
   })
   @IsString()
