@@ -13,7 +13,14 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dtos';
+import {
+  CreateUserDto,
+  GetUserInfoDto,
+  UpdateUserDto,
+  GetKakaoUrlDto,
+  CreateSessionDto,
+  GetRecipePreviewDto,
+} from './dtos';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   GetUrlService,
@@ -31,6 +38,8 @@ import { Request, Response } from 'express';
 import { AuthService } from '@auth/auth.service';
 import { User } from './schemas';
 import { AWSService } from '@modules/aws/aws.service';
+import { ApiResponse } from '@nestjs/swagger';
+import { GetCommentsDto } from './dtos/get-comments.dto';
 
 @Controller('users')
 export class UsersController {
@@ -50,17 +59,29 @@ export class UsersController {
 
   // 카카오 로그인 url
   @Get('/kakao/url')
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: GetKakaoUrlDto,
+  })
   getUrl() {
     return this.getUrlService.getUrl();
   }
 
   // 로그인
   @Post('/sessions')
+  @ApiResponse({
+    status: 201,
+    description: 'Success',
+    type: GetUserInfoDto,
+  })
   async signIn(
-    @Body('code') code: string,
+    @Body() createSessionDto: CreateSessionDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { email, access_token } = await this.signInService.getKakaoUser(code);
+    const { email, access_token } = await this.signInService.getKakaoUser(
+      createSessionDto.code,
+    );
 
     const updatedUser = await this.signInService.saveToken(email, access_token);
     if (!updatedUser) {
@@ -94,6 +115,10 @@ export class UsersController {
 
   // 회원가입
   @Post()
+  @ApiResponse({
+    status: 201,
+    description: 'Success',
+  })
   @UseInterceptors(FileInterceptor('profile_image'))
   async signUp(
     @UploadedFile() profile_image: Express.Multer.File,
@@ -132,6 +157,10 @@ export class UsersController {
 
   // 로그아웃
   @Delete('/sessions')
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+  })
   @UseGuards(AuthGuard)
   async signOut(
     @Req() req: Request,
@@ -144,6 +173,11 @@ export class UsersController {
 
   // 회원정보 수정
   @Put()
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: GetUserInfoDto,
+  })
   @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('profile_image'))
   async updateUser(
@@ -187,6 +221,10 @@ export class UsersController {
 
   // 회원탈퇴
   @Delete()
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+  })
   @UseGuards(AuthGuard)
   async signOff(
     @Req() req: Request,
@@ -199,6 +237,11 @@ export class UsersController {
 
   // 북마크 레시피 조회
   @Get('/bookmark')
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: GetRecipePreviewDto,
+  })
   @UseGuards(AuthGuard)
   async getUserBookmark(@Req() req: Request) {
     const id = req.user.userId;
@@ -207,6 +250,11 @@ export class UsersController {
 
   // 나의 레시피 조회
   @Get('/recipes')
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: GetRecipePreviewDto,
+  })
   @UseGuards(AuthGuard)
   async getUserRecipes(@Req() req: Request) {
     const id = req.user.userId;
@@ -215,6 +263,11 @@ export class UsersController {
 
   // 나의 댓글 조회
   @Get('/comments')
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    type: GetCommentsDto,
+  })
   @UseGuards(AuthGuard)
   async getUserComments(@Req() req: Request) {
     const id = req.user.userId;
